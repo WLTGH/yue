@@ -6,88 +6,103 @@
   <title>月矿统计</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --bg: #f4f5f7;
-      --card: #ffffff;
-      --line: #e6e8ee;
-      --text: #1c1c1e;
-      --muted: #6b7280;
-      --blue: #3b82f6;
-      --green: #16a34a;
-      --red: #ef4444;
-      --shadow: 0 8px 24px rgba(15, 23, 42, .06);
-    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(900px 320px at 0% -10%, rgba(59,130,246,.12), transparent 55%),
+        radial-gradient(700px 280px at 100% 0%, rgba(34,160,107,.10), transparent 50%),
+        #f3f5f9;
+      color: #1a1a1a;
+      font-size: 14px;
     }
     .app {
-      max-width: 720px;
+      max-width: 700px;
       margin: 0 auto;
-      padding: 16px 14px 40px;
+      padding: 18px 12px 40px;
     }
     h1 {
       margin: 8px 0 4px;
       font-size: 22px;
-      text-align: center;
+      font-weight: 700;
+      letter-spacing: .2px;
+      line-height: 1.3;
+      -webkit-font-smoothing: antialiased;
     }
     .sub {
-      text-align: center;
-      color: var(--muted);
+      display: block;
+      margin: 0 0 14px;
+      color: #6b7280;
       font-size: 13px;
-      margin: 0 0 16px;
     }
     .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid #e2e6ef;
+      border-radius: 12px;
       padding: 14px;
-      box-shadow: var(--shadow);
       margin-bottom: 12px;
+      box-shadow: 0 6px 18px rgba(20, 30, 50, .05);
     }
     .card h2 {
       margin: 0 0 10px;
-      font-size: 15px;
+      font-size: 14px;
+      font-weight: 650;
+      color: #2d3748;
     }
     label {
       display: block;
       font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 5px;
+      color: #7a8494;
+      margin-bottom: 4px;
     }
-    input, button, select {
-      font: inherit;
-    }
+    input, button, select { font: inherit; }
     input[type="text"], input[type="number"], input[type="date"] {
       width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px 12px;
+      border: 1px solid #d7dce6;
+      border-radius: 8px;
+      padding: 9px 11px;
       background: #fff;
+    }
+    input:focus {
+      outline: none;
+      border-color: #5b8def;
+      box-shadow: 0 0 0 3px rgba(91,141,239,.18);
     }
     .row {
       display: flex;
       gap: 8px;
       align-items: end;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .row > div { flex: 1; min-width: 0; }
     .btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 12px;
-      background: var(--blue);
-      color: #fff;
+      border: 1px solid #c5d4f0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      background: #eaf1fc;
+      color: #3a5f9a;
       white-space: nowrap;
       cursor: pointer;
+      box-shadow: none;
     }
-    .btn.green { background: var(--green); }
-    .btn.gray { background: #eef1f6; color: #111827; }
-    .btn.red { background: var(--red); }
-    .btn.small { padding: 6px 8px; font-size: 12px; }
+    .btn:active { background: #dce7f8; }
+    .btn.green {
+      background: #e6f5ec;
+      border-color: #b7dcc6;
+      color: #2f7a4e;
+    }
+    .btn.gray {
+      background: #f3f4f7;
+      border-color: #d9dde6;
+      color: #555;
+    }
+    .btn.red {
+      background: #fdeeee;
+      border-color: #f0c4c4;
+      color: #b44747;
+    }
+    .btn.small { padding: 5px 8px; font-size: 12px; }
     .chips {
       display: flex;
       flex-wrap: wrap;
@@ -97,31 +112,36 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      border: 1px solid var(--line);
+      border: 1px solid #e3e7f0;
       border-radius: 999px;
-      padding: 5px 8px;
+      padding: 5px 9px;
       font-size: 13px;
-      background: #fafafa;
+      background: #f7f9fc;
     }
     .chip input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       margin: 0;
-      accent-color: var(--blue);
+      accent-color: #3b82f6;
     }
     .drawer-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
     .drawer {
-      border: 1px solid var(--line);
+      border: 1px solid #e3e7f0;
       border-radius: 10px;
       margin-top: 8px;
       overflow: hidden;
-      background: #fafafa;
+      background: #f7f9fc;
     }
     .drawer-head {
       width: 100%;
@@ -131,39 +151,34 @@
       gap: 8px;
       padding: 10px 12px;
       border: 0;
-      background: #f3f4f6;
-      color: var(--text);
+      background: linear-gradient(180deg, #f3f6fb, #edf1f7);
+      color: #222;
       cursor: pointer;
       font-size: 13px;
       text-align: left;
     }
-    .drawer-head:hover { background: #eef1f6; }
+    .drawer-head:hover { filter: brightness(.98); }
     .drawer-head .arrow {
-      transition: transform .25s ease;
-      color: var(--muted);
-      font-size: 12px;
+      transition: transform .2s ease;
+      color: #8a94a6;
+      font-size: 11px;
     }
     .drawer.open .drawer-head .arrow { transform: rotate(180deg); }
     .drawer-body {
       display: grid;
       grid-template-rows: 0fr;
-      transition: grid-template-rows .28s ease;
+      transition: grid-template-rows .22s ease;
       background: #fff;
     }
-    .drawer.open .drawer-body {
-      grid-template-rows: 1fr;
-    }
-    .drawer-body-inner {
-      overflow: hidden;
-      min-height: 0;
-    }
+    .drawer.open .drawer-body { grid-template-rows: 1fr; }
+    .drawer-body-inner { overflow: hidden; min-height: 0; }
     .drawer-body-inner > .chips {
       padding: 10px 12px 12px;
-      border-top: 1px solid var(--line);
+      border-top: 1px solid #e8ebf0;
     }
     .table-wrap {
       overflow-x: auto;
-      border: 1px solid var(--line);
+      border: 1px solid #e3e7f0;
       border-radius: 10px;
     }
     table {
@@ -172,23 +187,36 @@
       min-width: 420px;
     }
     th, td {
-      border-bottom: 1px solid var(--line);
-      padding: 8px;
+      border-bottom: 1px solid #eef0f5;
+      padding: 8px 6px;
       font-size: 13px;
       text-align: center;
     }
-    th { background: #f8fafc; font-weight: 650; }
+    th {
+      background: #f4f7fc;
+      font-weight: 650;
+      color: #334;
+    }
     td input {
-      padding: 7px 6px;
+      padding: 6px 4px;
       text-align: center;
+      border-radius: 6px;
     }
     .hint {
-      color: var(--muted);
+      color: #8a94a6;
       font-size: 12px;
-      line-height: 1.55;
-      margin: 8px 0 0;
+      margin: 6px 0 0;
     }
-    canvas { width: 100% !important; height: 420px !important; }
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+    .chart-box canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -199,14 +227,14 @@
 <body>
   <div class="app">
     <h1>月矿统计</h1>
-    <p class="sub">自定义日期，录入多角色数据，自动生成折线图</p>
+    <p class="sub">记每周数据，自动画折线</p>
 
     <div class="card">
-      <h2>角色 / 数据系列</h2>
+      <h2>角色</h2>
       <div class="row">
         <div>
           <label>名称</label>
-          <input id="seriesName" type="text" placeholder="例如：WLT" />
+          <input id="seriesName" type="text" placeholder="角色名" />
         </div>
         <button class="btn" id="addSeriesBtn">添加</button>
       </div>
@@ -231,7 +259,7 @@
     </div>
 
     <div class="card">
-      <h2>添加日期</h2>
+      <h2>日期</h2>
       <div class="row">
         <div>
           <label>日期</label>
@@ -246,6 +274,13 @@
         </button>
         <div class="drawer-body">
           <div class="drawer-body-inner">
+            <div style="padding:10px 12px 0;">
+              <div class="drawer-actions">
+                <button type="button" class="btn gray small" id="selectAllDatesBtn">全选</button>
+                <button type="button" class="btn gray small" id="clearDatesSelBtn">清空勾选</button>
+              </div>
+              <p class="hint" style="margin:0 0 6px;">勾选后，导出会只包含这些日期；不勾选则导出全部日期。</p>
+            </div>
             <div class="chips" id="dateChips"></div>
           </div>
         </div>
@@ -253,7 +288,7 @@
     </div>
 
     <div class="card">
-      <h2>数据表</h2>
+      <h2>表格</h2>
       <div class="table-wrap">
         <table>
           <thead id="thead"></thead>
@@ -264,7 +299,9 @@
 
     <div class="card">
       <h2>折线图</h2>
-      <canvas id="chart"></canvas>
+      <div class="chart-box">
+        <canvas id="chart"></canvas>
+      </div>
     </div>
 
     <div class="card">
@@ -284,6 +321,7 @@ const storeKey = "moon-ore-stats-v2";
 
 const state = { series: [], dates: [], values: {} };
 const selectedSeries = new Set();
+const selectedDates = new Set();
 
 function fmtMD(iso) {
   if (!iso) return "";
@@ -345,14 +383,35 @@ function addDate(date) {
 function removeDate(date) {
   state.dates = state.dates.filter(d => d !== date);
   delete state.values[date];
+  selectedDates.delete(date);
   save(); render();
+}
+
+function getExportDates(dateFilter) {
+  if (Array.isArray(dateFilter) && dateFilter.length) {
+    return dateFilter.filter(d => state.dates.includes(d));
+  }
+  const picked = state.dates.filter(d => selectedDates.has(d));
+  return picked.length ? picked : state.dates.slice();
+}
+
+function getExportSeries(seriesFilter) {
+  if (typeof seriesFilter === "string" && seriesFilter) {
+    return state.series.includes(seriesFilter) ? [seriesFilter] : [];
+  }
+  if (Array.isArray(seriesFilter) && seriesFilter.length) {
+    return seriesFilter.filter(s => state.series.includes(s));
+  }
+  const picked = state.series.filter(s => selectedSeries.has(s));
+  return picked.length ? picked : state.series.slice();
 }
 
 function renderDateChips() {
   const box = document.getElementById("dateChips");
   const title = document.getElementById("dateDrawerTitle");
   box.innerHTML = "";
-  title.textContent = "日期列表（" + state.dates.length + "）";
+  const selCount = state.dates.filter(d => selectedDates.has(d)).length;
+  title.textContent = "日期列表（" + state.dates.length + "）" + (selCount ? " · 已勾选 " + selCount : "");
   if (!state.dates.length) {
     box.innerHTML = '<span class="hint">还没有日期</span>';
     return;
@@ -360,7 +419,18 @@ function renderDateChips() {
   state.dates.forEach(date => {
     const el = document.createElement("div");
     el.className = "chip";
-    el.innerHTML = "<span>" + fmtMD(date) + "</span>";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = selectedDates.has(date);
+    cb.onchange = () => {
+      if (cb.checked) selectedDates.add(date);
+      else selectedDates.delete(date);
+      renderDateChips();
+    };
+    el.appendChild(cb);
+    const label = document.createElement("span");
+    label.textContent = fmtMD(date);
+    el.appendChild(label);
     const btn = document.createElement("button");
     btn.className = "btn red small";
     btn.textContent = "删";
@@ -408,14 +478,24 @@ function renderChips() {
     label.textContent = name;
     el.appendChild(label);
     const exp = document.createElement("button");
+    exp.type = "button";
     exp.className = "btn small";
     exp.textContent = "导出";
-    exp.onclick = () => exportImage([name]);
+    exp.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      exportImage([name]);
+    };
     el.appendChild(exp);
     const btn = document.createElement("button");
+    btn.type = "button";
     btn.className = "btn red small";
     btn.textContent = "删";
-    btn.onclick = () => removeSeries(name);
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeSeries(name);
+    };
     el.appendChild(btn);
     box.appendChild(el);
   });
@@ -472,29 +552,29 @@ const lineNamePlugin = {
         ctx.fillStyle = ds.borderColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
-        const lift = 8 + (i % 3) * 12;
-        ctx.fillText(String(val), pt.x, pt.y - lift);
+        ctx.fillText(String(val), Math.round(pt.x), Math.round(pt.y - 10));
         ctx.restore();
       });
       if (!last) return;
       ctx.save();
-      ctx.font = "bold 12px PingFang SC, Noto Sans SC, sans-serif";
+      ctx.font = "bold 12px PingFang SC, Microsoft YaHei, sans-serif";
       ctx.fillStyle = ds.borderColor;
-      ctx.textBaseline = "bottom";
-      ctx.textAlign = "center";
-      ctx.fillText(ds.label, last.x, last.y - 22 - (i % 3) * 12);
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillText(ds.label, Math.round(last.x + 10), Math.round(last.y));
       ctx.restore();
     });
   }
 };
 
-function buildDatasets(seriesList) {
+function buildDatasets(seriesList, dateList) {
   const list = seriesList && seriesList.length ? seriesList : state.series;
+  const dates = dateList && dateList.length ? dateList : state.dates;
   return list.map((name) => {
     const i = Math.max(0, state.series.indexOf(name));
     return {
       label: name,
-      data: state.dates.map(d => {
+      data: dates.map(d => {
         const v = state.values[d] ? state.values[d][name] : "";
         if (v === "" || v == null) return null;
         const n = Number(v);
@@ -512,34 +592,82 @@ function buildDatasets(seriesList) {
 }
 
 let chart;
+let chartResizeTimer = null;
+
+function getChartDpr() {
+  const d = window.devicePixelRatio || 1;
+  return Math.max(2, Math.min(3, d));
+}
+
 function updateChart() {
   const labels = state.dates.map(fmtMD);
-  const datasets = buildDatasets();
-  const ctx = document.getElementById("chart");
+  const datasets = buildDatasets().map(ds => Object.assign({}, ds, {
+    borderWidth: 2.5,
+    pointRadius: 4,
+    pointHoverRadius: 4
+  }));
+  const canvas = document.getElementById("chart");
+  const box = canvas.parentElement;
+  const cssW = Math.max(280, Math.floor(box.clientWidth || box.offsetWidth || 320));
+  const cssH = Math.max(200, Math.floor(box.clientHeight || 280));
+  const dpr = getChartDpr();
+
   if (chart) {
-    chart.data.labels = labels;
-    chart.data.datasets = datasets;
-    chart.update();
-    return;
+    chart.destroy();
+    chart = null;
   }
-  chart = new Chart(ctx, {
+
+  // 只设 CSS 尺寸，由 Chart.js 按 devicePixelRatio 生成高清缓冲，避免重复放大发糊
+  canvas.removeAttribute("width");
+  canvas.removeAttribute("height");
+  canvas.style.width = cssW + "px";
+  canvas.style.height = cssH + "px";
+
+  chart = new Chart(canvas, {
     type: "line",
     data: { labels, datasets },
     plugins: [lineNamePlugin],
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      devicePixelRatio: Math.max(2, window.devicePixelRatio || 1),
-      layout: { padding: { right: 12, top: 36, left: 4, bottom: 4 } },
-      interaction: { mode: "index", intersect: false },
-      plugins: { legend: { display: false } },
+      responsive: false,
+      animation: false,
+      devicePixelRatio: dpr,
+      layout: { padding: { right: 88, top: 24, left: 6, bottom: 8 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      events: [],
       scales: {
-        x: { offset: true, ticks: { autoSkip: false, maxRotation: 0, color: "#374151" } },
-        y: { beginAtZero: false, grace: "8%", ticks: { color: "#374151" } }
+        x: {
+          offset: true,
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            color: "#374151",
+            font: { size: 12, weight: "500" }
+          },
+          grid: { color: "rgba(0,0,0,.06)" }
+        },
+        y: {
+          beginAtZero: false,
+          grace: "10%",
+          ticks: {
+            color: "#374151",
+            font: { size: 12, weight: "500" }
+          },
+          grid: { color: "rgba(0,0,0,.06)" }
+        }
       }
     }
   });
 }
+
+window.addEventListener("resize", () => {
+  clearTimeout(chartResizeTimer);
+  chartResizeTimer = setTimeout(() => {
+    if (state.dates.length) updateChart();
+  }, 120);
+});
 
 function render() {
   renderChips();
@@ -562,10 +690,18 @@ document.getElementById("clearSeriesSelBtn").onclick = () => {
   selectedSeries.clear();
   renderChips();
 };
+document.getElementById("selectAllDatesBtn").onclick = () => {
+  state.dates.forEach(d => selectedDates.add(d));
+  renderDateChips();
+};
+document.getElementById("clearDatesSelBtn").onclick = () => {
+  selectedDates.clear();
+  renderDateChips();
+};
 document.getElementById("exportSelectedBtn").onclick = () => {
   const list = state.series.filter(s => selectedSeries.has(s));
   if (!list.length) return alert("请先勾选要导出的角色");
-  exportImage(list);
+  exportImage(list.slice());
 };
 document.getElementById("addSeriesBtn").onclick = () => {
   addSeries(document.getElementById("seriesName").value);
@@ -582,21 +718,31 @@ document.getElementById("clearBtn").onclick = () => {
   state.values = {};
   save(); render();
 };
-function exportImage(seriesFilter) {
+function exportImage(seriesFilter, dateFilter) {
   if (!state.dates.length || !state.series.length) {
     alert("请先添加日期和数据");
     return;
   }
-  const seriesList = seriesFilter && seriesFilter.length
-    ? seriesFilter.filter(s => state.series.includes(s))
-    : state.series.slice();
+  // 显式传入角色时只导出这些；未传参时若有勾选角色则用勾选，否则全部
+  const hasExplicitSeries = (typeof seriesFilter === "string" && seriesFilter)
+    || (Array.isArray(seriesFilter) && seriesFilter.length > 0);
+  const seriesList = hasExplicitSeries
+    ? getExportSeries(seriesFilter)
+    : (state.series.filter(s => selectedSeries.has(s)).length
+        ? state.series.filter(s => selectedSeries.has(s))
+        : state.series.slice());
   if (!seriesList.length) {
     alert("没有可导出的角色");
     return;
   }
+  const dateList = getExportDates(dateFilter);
+  if (!dateList.length) {
+    alert("没有可导出的日期");
+    return;
+  }
   const single = seriesList.length === 1;
   const cols = ["日期"].concat(seriesList);
-  const rows = state.dates.map(date => {
+  const rows = dateList.map(date => {
     return [fmtMD(date)].concat(seriesList.map(s => {
       const v = state.values[date] ? state.values[date][s] : "";
       return v == null || v === "" ? "-" : String(v);
@@ -611,7 +757,7 @@ function exportImage(seriesFilter) {
   const rowH = 52;
   const tableH = rowH * (rows.length + 1);
   const chartBoxW = width - pad * 2;
-  const chartH = 720;
+  const chartH = 520;
   const gap = 36;
   const height = pad + titleH + tableH + gap + chartH + pad;
 
@@ -630,7 +776,7 @@ function exportImage(seriesFilter) {
   ctx.fillText(single ? ("月矿统计 · " + seriesList[0]) : "月矿统计", width / 2, pad + 38);
   ctx.fillStyle = "#6b7280";
   ctx.font = "20px PingFang SC, Noto Sans SC, sans-serif";
-  ctx.fillText(single ? "单角色数据表 + 折线图" : "数据表 + 折线图", width / 2, pad + 70);
+  ctx.fillText(single ? seriesList[0] + " · 表+图" : "表 + 图", width / 2, pad + 70);
 
   const tableX = pad;
   const tableY = pad + titleH;
@@ -681,8 +827,8 @@ function exportImage(seriesFilter) {
   const hi = new Chart(hold, {
     type: "line",
     data: {
-      labels: state.dates.map(fmtMD),
-      datasets: buildDatasets(seriesList).map(ds => Object.assign({}, ds, { pointRadius: 6, borderWidth: 3 }))
+      labels: dateList.map(fmtMD),
+      datasets: buildDatasets(seriesList, dateList).map(ds => Object.assign({}, ds, { pointRadius: 6, borderWidth: 3 }))
     },
     plugins: [lineNamePlugin],
     options: {
@@ -690,7 +836,7 @@ function exportImage(seriesFilter) {
       responsive: false,
       maintainAspectRatio: false,
       devicePixelRatio: 3,
-      layout: { padding: { right: 16, top: 40, left: 8, bottom: 8 } },
+      layout: { padding: { right: 100, top: 28, left: 8, bottom: 10 } },
       plugins: { legend: { display: false } },
       scales: {
         x: { offset: true, ticks: { autoSkip: false, maxRotation: 0, color: "#374151", font: { size: 16 } } },
@@ -715,7 +861,11 @@ function downloadCanvas(canvas, filename) {
   a.click();
 }
 
-document.getElementById("exportImgBtn").onclick = () => exportImage();
+document.getElementById("exportImgBtn").onclick = () => {
+  // 底部按钮：有勾选角色就导出勾选，否则全部；日期同理
+  const seriesList = state.series.filter(s => selectedSeries.has(s));
+  exportImage(seriesList.length ? seriesList.slice() : state.series.slice());
+};
 document.getElementById("exportBtn").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
