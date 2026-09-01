@@ -103,7 +103,64 @@
       font-size: 13px;
       background: #fafafa;
     }
+    .chip input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--blue);
+    }
+    .drawer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .drawer {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-top: 8px;
+      overflow: hidden;
+      background: #fafafa;
+    }
+    .drawer-head {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 0;
+      background: #f3f4f6;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+    }
+    .drawer-head:hover { background: #eef1f6; }
+    .drawer-head .arrow {
+      transition: transform .25s ease;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .drawer.open .drawer-head .arrow { transform: rotate(180deg); }
+    .drawer-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .28s ease;
+      background: #fff;
+    }
+    .drawer.open .drawer-body {
+      grid-template-rows: 1fr;
+    }
+    .drawer-body-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+    .drawer-body-inner > .chips {
+      padding: 10px 12px 12px;
+      border-top: 1px solid var(--line);
+    }
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--line);
@@ -153,7 +210,24 @@
         </div>
         <button class="btn" id="addSeriesBtn">添加</button>
       </div>
-      <div class="chips" id="seriesChips"></div>
+      <div class="drawer" id="seriesDrawer">
+        <button type="button" class="drawer-head" id="seriesDrawerBtn">
+          <span id="seriesDrawerTitle">角色列表（0）</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div class="drawer-body">
+          <div class="drawer-body-inner">
+            <div style="padding:10px 12px 0;">
+              <div class="drawer-actions">
+                <button type="button" class="btn gray small" id="selectAllSeriesBtn">全选</button>
+                <button type="button" class="btn gray small" id="clearSeriesSelBtn">清空勾选</button>
+                <button type="button" class="btn small" id="exportSelectedBtn">导出勾选</button>
+              </div>
+            </div>
+            <div class="chips" id="seriesChips"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -165,8 +239,17 @@
         </div>
         <button class="btn green" id="addDateBtn">添加日期</button>
       </div>
-      <p class="hint">点日期标签上的「删」即可删除该日期及对应数据。</p>
-      <div class="chips" id="dateChips"></div>
+      <div class="drawer" id="dateDrawer">
+        <button type="button" class="drawer-head" id="dateDrawerBtn">
+          <span id="dateDrawerTitle">日期列表（0）</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div class="drawer-body">
+          <div class="drawer-body-inner">
+            <div class="chips" id="dateChips"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -200,6 +283,7 @@ const COLORS = ["#3b82f6", "#16a34a", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"
 const storeKey = "moon-ore-stats-v2";
 
 const state = { series: [], dates: [], values: {} };
+const selectedSeries = new Set();
 
 function fmtMD(iso) {
   if (!iso) return "";
@@ -245,6 +329,7 @@ function addSeries(name) {
 function removeSeries(name) {
   state.series = state.series.filter(s => s !== name);
   Object.keys(state.values).forEach(d => delete state.values[d][name]);
+  selectedSeries.delete(name);
   save(); render();
 }
 
@@ -258,7 +343,6 @@ function addDate(date) {
 }
 
 function removeDate(date) {
-  if (!confirm("删除日期 " + fmtMD(date) + " 及其数据？")) return;
   state.dates = state.dates.filter(d => d !== date);
   delete state.values[date];
   save(); render();
@@ -266,7 +350,9 @@ function removeDate(date) {
 
 function renderDateChips() {
   const box = document.getElementById("dateChips");
+  const title = document.getElementById("dateDrawerTitle");
   box.innerHTML = "";
+  title.textContent = "日期列表（" + state.dates.length + "）";
   if (!state.dates.length) {
     box.innerHTML = '<span class="hint">还没有日期</span>';
     return;
@@ -293,11 +379,39 @@ function setValue(date, series, value) {
 
 function renderChips() {
   const box = document.getElementById("seriesChips");
+  const title = document.getElementById("seriesDrawerTitle");
   box.innerHTML = "";
+  const selCount = state.series.filter(s => selectedSeries.has(s)).length;
+  title.textContent = "角色列表（" + state.series.length + "）" + (selCount ? " · 已勾选 " + selCount : "");
+  if (!state.series.length) {
+    box.innerHTML = '<span class="hint">还没有角色</span>';
+    return;
+  }
   state.series.forEach((name, i) => {
+    if (!state.series.includes(name)) selectedSeries.delete(name);
     const el = document.createElement("div");
     el.className = "chip";
-    el.innerHTML = '<span class="dot" style="background:' + COLORS[i % COLORS.length] + '"></span><span>' + name + "</span>";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = selectedSeries.has(name);
+    cb.onchange = () => {
+      if (cb.checked) selectedSeries.add(name);
+      else selectedSeries.delete(name);
+      renderChips();
+    };
+    el.appendChild(cb);
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.style.background = COLORS[i % COLORS.length];
+    el.appendChild(dot);
+    const label = document.createElement("span");
+    label.textContent = name;
+    el.appendChild(label);
+    const exp = document.createElement("button");
+    exp.className = "btn small";
+    exp.textContent = "导出";
+    exp.onclick = () => exportImage([name]);
+    el.appendChild(exp);
     const btn = document.createElement("button");
     btn.className = "btn red small";
     btn.textContent = "删";
@@ -374,23 +488,27 @@ const lineNamePlugin = {
   }
 };
 
-function buildDatasets() {
-  return state.series.map((name, i) => ({
-    label: name,
-    data: state.dates.map(d => {
-      const v = state.values[d] ? state.values[d][name] : "";
-      if (v === "" || v == null) return null;
-      const n = Number(v);
-      return Number.isFinite(n) ? n : null;
-    }),
-    borderColor: COLORS[i % COLORS.length],
-    backgroundColor: COLORS[i % COLORS.length] + "33",
-    tension: 0.25,
-    spanGaps: true,
-    pointRadius: 5,
-    borderWidth: 2,
-    clip: false
-  }));
+function buildDatasets(seriesList) {
+  const list = seriesList && seriesList.length ? seriesList : state.series;
+  return list.map((name) => {
+    const i = Math.max(0, state.series.indexOf(name));
+    return {
+      label: name,
+      data: state.dates.map(d => {
+        const v = state.values[d] ? state.values[d][name] : "";
+        if (v === "" || v == null) return null;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      }),
+      borderColor: COLORS[i % COLORS.length],
+      backgroundColor: COLORS[i % COLORS.length] + "33",
+      tension: 0.25,
+      spanGaps: true,
+      pointRadius: 5,
+      borderWidth: 2,
+      clip: false
+    };
+  });
 }
 
 let chart;
@@ -430,6 +548,25 @@ function render() {
   updateChart();
 }
 
+document.getElementById("seriesDrawerBtn").onclick = () => {
+  document.getElementById("seriesDrawer").classList.toggle("open");
+};
+document.getElementById("dateDrawerBtn").onclick = () => {
+  document.getElementById("dateDrawer").classList.toggle("open");
+};
+document.getElementById("selectAllSeriesBtn").onclick = () => {
+  state.series.forEach(s => selectedSeries.add(s));
+  renderChips();
+};
+document.getElementById("clearSeriesSelBtn").onclick = () => {
+  selectedSeries.clear();
+  renderChips();
+};
+document.getElementById("exportSelectedBtn").onclick = () => {
+  const list = state.series.filter(s => selectedSeries.has(s));
+  if (!list.length) return alert("请先勾选要导出的角色");
+  exportImage(list);
+};
 document.getElementById("addSeriesBtn").onclick = () => {
   addSeries(document.getElementById("seriesName").value);
   document.getElementById("seriesName").value = "";
@@ -445,21 +582,29 @@ document.getElementById("clearBtn").onclick = () => {
   state.values = {};
   save(); render();
 };
-function exportImage() {
+function exportImage(seriesFilter) {
   if (!state.dates.length || !state.series.length) {
     alert("请先添加日期和数据");
     return;
   }
-  const cols = ["日期"].concat(state.series);
+  const seriesList = seriesFilter && seriesFilter.length
+    ? seriesFilter.filter(s => state.series.includes(s))
+    : state.series.slice();
+  if (!seriesList.length) {
+    alert("没有可导出的角色");
+    return;
+  }
+  const single = seriesList.length === 1;
+  const cols = ["日期"].concat(seriesList);
   const rows = state.dates.map(date => {
-    return [fmtMD(date)].concat(state.series.map(s => {
+    return [fmtMD(date)].concat(seriesList.map(s => {
       const v = state.values[date] ? state.values[date][s] : "";
       return v == null || v === "" ? "-" : String(v);
     }));
   });
 
   const scale = 3;
-  const width = 1600;
+  const width = single ? 1200 : 1600;
   const pad = 56;
   const titleH = 90;
   const colW = (width - pad * 2) / cols.length;
@@ -482,10 +627,10 @@ function exportImage() {
   ctx.fillStyle = "#111827";
   ctx.font = "bold 40px PingFang SC, Noto Sans SC, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("月矿统计", width / 2, pad + 38);
+  ctx.fillText(single ? ("月矿统计 · " + seriesList[0]) : "月矿统计", width / 2, pad + 38);
   ctx.fillStyle = "#6b7280";
   ctx.font = "20px PingFang SC, Noto Sans SC, sans-serif";
-  ctx.fillText("数据表 + 折线图", width / 2, pad + 70);
+  ctx.fillText(single ? "单角色数据表 + 折线图" : "数据表 + 折线图", width / 2, pad + 70);
 
   const tableX = pad;
   const tableY = pad + titleH;
@@ -512,7 +657,13 @@ function exportImage() {
       ctx.fillRect(x, y, colW, rowH);
       ctx.strokeStyle = "#d1d5db";
       ctx.strokeRect(x, y, colW, rowH);
-      ctx.fillStyle = i === 0 ? "#111827" : (COLORS[(i - 1) % COLORS.length]);
+      let color = "#111827";
+      if (i > 0) {
+        const sName = seriesList[i - 1];
+        const si = Math.max(0, state.series.indexOf(sName));
+        color = COLORS[si % COLORS.length];
+      }
+      ctx.fillStyle = color;
       ctx.font = (i === 0 ? "bold " : "") + "22px PingFang SC, Noto Sans SC, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -529,7 +680,10 @@ function exportImage() {
 
   const hi = new Chart(hold, {
     type: "line",
-    data: { labels: state.dates.map(fmtMD), datasets: buildDatasets().map(ds => Object.assign({}, ds, { pointRadius: 6, borderWidth: 3 })) },
+    data: {
+      labels: state.dates.map(fmtMD),
+      datasets: buildDatasets(seriesList).map(ds => Object.assign({}, ds, { pointRadius: 6, borderWidth: 3 }))
+    },
     plugins: [lineNamePlugin],
     options: {
       animation: false,
@@ -548,20 +702,20 @@ function exportImage() {
   requestAnimationFrame(() => {
     const y = tableY + tableH + gap;
     ctx.drawImage(hold, pad, y, chartBoxW, chartH);
-    downloadCanvas(canvas);
+    downloadCanvas(canvas, single ? ("月矿统计-" + seriesList[0] + ".png") : "月矿统计.png");
     hi.destroy();
     hold.remove();
   });
 }
 
-function downloadCanvas(canvas) {
+function downloadCanvas(canvas, filename) {
   const a = document.createElement("a");
   a.href = canvas.toDataURL("image/png");
-  a.download = "月矿统计.png";
+  a.download = filename || "月矿统计.png";
   a.click();
 }
 
-document.getElementById("exportImgBtn").onclick = exportImage;
+document.getElementById("exportImgBtn").onclick = () => exportImage();
 document.getElementById("exportBtn").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
