@@ -2,73 +2,208 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>月矿统计</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <title>月矿统计 🌙</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
+    :root {
+      --bg-1: #fdf6f2;
+      --bg-2: #f6e8ec;
+      --bg-3: #efe6ee;
+      --card-bg: rgba(255, 253, 251, .88);
+      --card-border: #ecdfe0;
+      --text: #4a3b42;
+      --muted: #a4919a;
+      --pink: #c98a9c;
+      --pink-deep: #b06a80;
+      --pink-soft: #f2dee3;
+      --violet: #a79bc4;
+      --violet-soft: #e9e2ef;
+      --mint: #8fb3a0;
+      --mint-soft: #dfeae3;
+      --peach: #d9a66c;
+      --peach-soft: #f3e6d2;
+      --coral: #c98576;
+      --coral-soft: #f1ddd6;
+      --grid-line: rgba(169, 120, 140, .14);
+      --input-bg: #fffdfb;
+      --shadow-color: rgba(150, 110, 120, .14);
+      --chip-bg: #faf1f0;
+      --table-head: linear-gradient(180deg, #f7e9ec, #f2dfe4);
+      --table-row-alt: #fbf3f1;
+      --sparkle-opacity: .35;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg-1: #211a26;
+        --bg-2: #2b2130;
+        --bg-3: #1c1622;
+        --card-bg: rgba(43, 33, 48, .72);
+        --card-border: #443648;
+        --text: #ecdfe6;
+        --muted: #b3a0ac;
+        --pink: #d99cae;
+        --pink-deep: #c97f95;
+        --pink-soft: #3c2c34;
+        --violet: #b7a6d1;
+        --violet-soft: #362c44;
+        --mint: #9fc3b1;
+        --mint-soft: #253830;
+        --peach: #e0b881;
+        --peach-soft: #3c2f20;
+        --coral: #d99a8c;
+        --coral-soft: #3c2b27;
+        --grid-line: rgba(217, 156, 174, .16);
+        --input-bg: #2a2130;
+        --shadow-color: rgba(0, 0, 0, .35);
+        --chip-bg: #322833;
+        --table-head: linear-gradient(180deg, #3a2d3c, #332833);
+        --table-row-alt: #2a212c;
+        --sparkle-opacity: .7;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg-1: #211a26; --bg-2: #2b2130; --bg-3: #1c1622;
+      --card-bg: rgba(43, 33, 48, .72); --card-border: #443648;
+      --text: #ecdfe6; --muted: #b3a0ac;
+      --pink: #d99cae; --pink-deep: #c97f95; --pink-soft: #3c2c34;
+      --violet: #b7a6d1; --violet-soft: #362c44;
+      --mint: #9fc3b1; --mint-soft: #253830;
+      --peach: #e0b881; --peach-soft: #3c2f20;
+      --coral: #d99a8c; --coral-soft: #3c2b27;
+      --grid-line: rgba(217, 156, 174, .16);
+      --input-bg: #2a2130; --shadow-color: rgba(0,0,0,.35);
+      --chip-bg: #322833; --table-head: linear-gradient(180deg, #3a2d3c, #332833);
+      --table-row-alt: #2a212c; --sparkle-opacity: .7;
+    }
+
     * { box-sizing: border-box; }
+    html, body { background: var(--bg-1); }
+    html { scroll-padding-top: env(safe-area-inset-top, 0px); }
     body {
       margin: 0;
-      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: "Quicksand", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
       background:
-        radial-gradient(900px 320px at 0% -10%, rgba(59,130,246,.12), transparent 55%),
-        radial-gradient(700px 280px at 100% 0%, rgba(34,160,107,.10), transparent 50%),
-        #f3f5f9;
-      color: #1a1a1a;
+        radial-gradient(700px 320px at 8% -8%, var(--bg-2), transparent 55%),
+        radial-gradient(620px 300px at 100% 0%, var(--bg-3), transparent 55%),
+        var(--bg-1);
+      color: var(--text);
       font-size: 14px;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      position: relative;
+      overflow-x: hidden;
+      transition: background-color .3s ease, color .3s ease;
     }
+
+    /* ---- 装饰性背景：漂浮的小星星与月牙，纯装饰不影响交互 ---- */
+    .sky-deco {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      opacity: var(--sparkle-opacity);
+    }
+    .sky-deco span {
+      position: absolute;
+      font-size: 18px;
+      filter: drop-shadow(0 0 6px var(--shadow-color));
+      animation: floaty 7s ease-in-out infinite;
+      opacity: .5;
+    }
+    .sky-deco span:nth-child(1) { top: 6%; left: 8%; font-size: 22px; animation-delay: 0s; }
+    .sky-deco span:nth-child(2) { top: 14%; left: 82%; font-size: 14px; animation-delay: 1.1s; }
+    .sky-deco span:nth-child(3) { top: 34%; left: 92%; font-size: 16px; animation-delay: 2.3s; }
+    .sky-deco span:nth-child(4) { top: 58%; left: 4%; font-size: 15px; animation-delay: .6s; }
+    .sky-deco span:nth-child(5) { top: 78%; left: 88%; font-size: 20px; animation-delay: 1.8s; }
+    .sky-deco span:nth-child(6) { top: 90%; left: 12%; font-size: 13px; animation-delay: 3s; }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(8deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+
     .app {
+      position: relative;
+      z-index: 1;
       max-width: 700px;
       margin: 0 auto;
-      padding: 18px 12px 40px;
+      padding: 22px 14px 44px;
     }
     h1 {
-      margin: 8px 0 4px;
-      font-size: 22px;
+      margin: 6px 0 2px;
+      font-family: "Baloo 2", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: .2px;
       line-height: 1.3;
+      background: linear-gradient(90deg, var(--pink-deep), var(--violet) 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .sub {
       display: block;
-      margin: 0 0 14px;
-      color: #6b7280;
+      margin: 0 0 16px;
+      color: var(--muted);
       font-size: 13px;
+      font-weight: 500;
     }
+
     .card {
-      background: rgba(255,255,255,.92);
-      border: 1px solid #e2e6ef;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 6px 18px rgba(20, 30, 50, .05);
+      background: var(--card-bg);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 10px 26px var(--shadow-color);
+      transition: background-color .3s ease, border-color .3s ease;
     }
     .card h2 {
-      margin: 0 0 10px;
-      font-size: 14px;
-      font-weight: 650;
-      color: #2d3748;
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .card h2 .ico { font-size: 16px; }
+
     label {
       display: block;
       font-size: 12px;
-      color: #7a8494;
-      margin-bottom: 4px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-weight: 600;
     }
     input, button, select { font: inherit; }
     input[type="text"], input[type="number"], input[type="date"] {
       width: 100%;
-      border: 1px solid #d7dce6;
-      border-radius: 8px;
-      padding: 9px 11px;
-      background: #fff;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      color: var(--text);
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
     input:focus {
       outline: none;
-      border-color: #5b8def;
-      box-shadow: 0 0 0 3px rgba(91,141,239,.18);
+      border-color: var(--pink);
+      box-shadow: 0 0 0 4px var(--pink-soft);
     }
+
     .row {
       display: flex;
       gap: 8px;
@@ -76,33 +211,40 @@
       margin-bottom: 8px;
     }
     .row > div { flex: 1; min-width: 0; }
+
+    /* ---- 按钮：圆润渐变糖果风 ---- */
     .btn {
-      border: 1px solid #c5d4f0;
-      border-radius: 8px;
-      padding: 9px 12px;
-      background: #eaf1fc;
-      color: #3a5f9a;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: var(--pink-deep);
+      color: #fff9fa;
+      font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
-      box-shadow: none;
+      box-shadow: 0 4px 12px var(--shadow-color);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
     }
-    .btn:active { background: #dce7f8; }
+    .btn:hover { filter: brightness(1.06); }
+    .btn:active { transform: scale(.96); box-shadow: 0 2px 6px var(--shadow-color); }
     .btn.green {
-      background: #e6f5ec;
-      border-color: #b7dcc6;
-      color: #2f7a4e;
+      background: var(--mint);
+      color: #23392f;
     }
     .btn.gray {
-      background: #f3f4f7;
-      border-color: #d9dde6;
-      color: #555;
+      background: var(--violet-soft);
+      color: var(--violet);
+      box-shadow: none;
+      border-color: var(--card-border);
     }
     .btn.red {
-      background: #fdeeee;
-      border-color: #f0c4c4;
-      color: #b44747;
+      background: var(--coral-soft);
+      color: var(--coral);
+      box-shadow: none;
+      border-color: var(--card-border);
     }
-    .btn.small { padding: 5px 8px; font-size: 12px; }
+    .btn.small { padding: 6px 11px; font-size: 12px; }
+
     .chips {
       display: flex;
       flex-wrap: wrap;
@@ -111,18 +253,20 @@
     .chip {
       display: flex;
       align-items: center;
-      gap: 6px;
-      border: 1px solid #e3e7f0;
+      gap: 7px;
+      border: 1.5px solid var(--card-border);
       border-radius: 999px;
-      padding: 5px 9px;
+      padding: 6px 10px;
       font-size: 13px;
-      background: #f7f9fc;
+      font-weight: 600;
+      background: var(--chip-bg);
+      color: var(--text);
     }
     .chip input[type="checkbox"] {
-      width: 15px;
-      height: 15px;
+      width: 16px;
+      height: 16px;
       margin: 0;
-      accent-color: #3b82f6;
+      accent-color: var(--pink);
     }
     .drawer-actions {
       display: flex;
@@ -131,17 +275,23 @@
       margin-bottom: 8px;
     }
     .dot {
-      width: 9px;
-      height: 9px;
+      width: 11px;
+      height: 11px;
       border-radius: 50%;
       flex-shrink: 0;
+      box-shadow: 0 0 0 2px #fff, 0 0 6px var(--shadow-color);
     }
+    :root[data-theme="dark"] .dot { box-shadow: 0 0 0 2px #2a1f3d, 0 0 6px var(--shadow-color); }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .dot { box-shadow: 0 0 0 2px #2a1f3d, 0 0 6px var(--shadow-color); }
+    }
+
     .drawer {
-      border: 1px solid #e3e7f0;
-      border-radius: 10px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
       margin-top: 8px;
       overflow: hidden;
-      background: #f7f9fc;
+      background: var(--chip-bg);
     }
     .drawer-head {
       width: 100%;
@@ -149,37 +299,39 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 10px 12px;
+      padding: 11px 14px;
       border: 0;
-      background: linear-gradient(180deg, #f3f6fb, #edf1f7);
-      color: #222;
+      background: var(--table-head);
+      color: var(--text);
       cursor: pointer;
       font-size: 13px;
+      font-weight: 700;
       text-align: left;
     }
-    .drawer-head:hover { filter: brightness(.98); }
+    .drawer-head:hover { filter: brightness(1.02); }
     .drawer-head .arrow {
       transition: transform .2s ease;
-      color: #8a94a6;
-      font-size: 11px;
+      color: var(--pink);
+      font-size: 12px;
     }
     .drawer.open .drawer-head .arrow { transform: rotate(180deg); }
     .drawer-body {
       display: grid;
       grid-template-rows: 0fr;
       transition: grid-template-rows .22s ease;
-      background: #fff;
+      background: var(--card-bg);
     }
     .drawer.open .drawer-body { grid-template-rows: 1fr; }
     .drawer-body-inner { overflow: hidden; min-height: 0; }
     .drawer-body-inner > .chips {
       padding: 10px 12px 12px;
-      border-top: 1px solid #e8ebf0;
+      border-top: 1px solid var(--card-border);
     }
+
     .table-wrap {
       overflow-x: auto;
-      border: 1px solid #e3e7f0;
-      border-radius: 10px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
     }
     table {
       width: 100%;
@@ -187,25 +339,27 @@
       min-width: 420px;
     }
     th, td {
-      border-bottom: 1px solid #eef0f5;
-      padding: 8px 6px;
+      border-bottom: 1px solid var(--card-border);
+      padding: 9px 6px;
       font-size: 13px;
       text-align: center;
+      color: var(--text);
     }
     th {
-      background: #f4f7fc;
-      font-weight: 650;
-      color: #334;
+      background: var(--table-head);
+      font-weight: 700;
     }
+    tbody tr:nth-child(even) td { background: var(--table-row-alt); }
     td input {
       padding: 6px 4px;
       text-align: center;
-      border-radius: 6px;
+      border-radius: 8px;
     }
     .hint {
-      color: #8a94a6;
+      color: var(--muted);
       font-size: 12px;
       margin: 6px 0 0;
+      font-weight: 500;
     }
     .chart-scroll {
       width: 100%;
@@ -228,12 +382,16 @@
   </style>
 </head>
 <body>
+  <div class="sky-deco" aria-hidden="true">
+    <span>✨</span><span>⭐</span><span>💫</span><span>🌸</span><span>✨</span><span>⭐</span>
+  </div>
+
   <div class="app">
-    <h1>月矿统计</h1>
-    <p class="sub">记每周数据，自动画折线</p>
+    <h1><span>🌙</span>月矿统计<span>✨</span></h1>
+    <p class="sub">记每周数据</p>
 
     <div class="card">
-      <h2>角色</h2>
+      <h2><span class="ico">🎀</span>角色</h2>
       <div class="row">
         <div>
           <label>名称</label>
@@ -244,7 +402,7 @@
       <div class="drawer" id="seriesDrawer">
         <button type="button" class="drawer-head" id="seriesDrawerBtn">
           <span id="seriesDrawerTitle">角色列表（0）</span>
-          <span class="arrow">▼</span>
+          <span class="arrow">▾</span>
         </button>
         <div class="drawer-body">
           <div class="drawer-body-inner">
@@ -262,7 +420,7 @@
     </div>
 
     <div class="card">
-      <h2>日期</h2>
+      <h2><span class="ico">🗓️</span>日期</h2>
       <div class="row">
         <div>
           <label>日期</label>
@@ -273,7 +431,7 @@
       <div class="drawer" id="dateDrawer">
         <button type="button" class="drawer-head" id="dateDrawerBtn">
           <span id="dateDrawerTitle">日期列表（0）</span>
-          <span class="arrow">▼</span>
+          <span class="arrow">▾</span>
         </button>
         <div class="drawer-body">
           <div class="drawer-body-inner">
@@ -291,7 +449,7 @@
     </div>
 
     <div class="card">
-      <h2>表格</h2>
+      <h2><span class="ico">📋</span>数据表格</h2>
       <div class="table-wrap">
         <table>
           <thead id="thead"></thead>
@@ -301,7 +459,7 @@
     </div>
 
     <div class="card">
-      <h2>图</h2>
+      <h2><span class="ico">🌈</span>趋势图</h2>
       <div class="chart-scroll">
         <div class="chart-box" id="chartBox">
           <canvas id="chart"></canvas>
@@ -310,6 +468,7 @@
     </div>
 
     <div class="card">
+      <h2><span class="ico">💌</span>数据管理</h2>
       <div class="actions">
         <button class="btn small" id="exportImgBtn">导出图片</button>
         <button class="btn gray small" id="exportBtn">复制 JSON</button>
@@ -320,7 +479,7 @@
   </div>
 
 <script>
-const COLORS = ["#3b82f6", "#16a34a", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316"];
+const COLORS = ["#c98a9c", "#a79bc4", "#8fb3a0", "#d9a66c", "#8aa3c2", "#b98aa0", "#a68a6a"];
 const storeKey = "moon-ore-stats-v2";
 
 const state = { series: [], dates: [], values: {} };
@@ -552,7 +711,7 @@ const lineNamePlugin = {
         if (val == null || !Number.isFinite(Number(val)) || !pt) return;
         last = pt;
         ctx.save();
-        ctx.font = "bold 11px PingFang SC, Noto Sans SC, sans-serif";
+        ctx.font = "bold 11px Quicksand, PingFang SC, Noto Sans SC, sans-serif";
         ctx.fillStyle = ds.borderColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
@@ -561,7 +720,7 @@ const lineNamePlugin = {
       });
       if (!last) return;
       ctx.save();
-      ctx.font = "bold 12px PingFang SC, Microsoft YaHei, sans-serif";
+      ctx.font = "bold 12px Quicksand, PingFang SC, Microsoft YaHei, sans-serif";
       ctx.fillStyle = ds.borderColor;
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
@@ -586,7 +745,7 @@ function buildDatasets(seriesList, dateList) {
       }),
       borderColor: COLORS[i % COLORS.length],
       backgroundColor: COLORS[i % COLORS.length] + "33",
-      tension: 0.25,
+      tension: 0.35,
       spanGaps: true,
       pointRadius: 5,
       borderWidth: 2,
@@ -618,6 +777,8 @@ function updateChart() {
   const cssW = Math.max(viewW, labels.length * 56 + 110);
   const cssH = 280;
   const dpr = getChartDpr();
+  const tickColor = getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#5b4368";
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue("--grid-line").trim() || "rgba(255,111,165,.12)";
 
   if (chart) {
     chart.destroy();
@@ -650,19 +811,19 @@ function updateChart() {
           ticks: {
             autoSkip: false,
             maxRotation: 0,
-            color: "#374151",
-            font: { size: 11, weight: "500" }
+            color: tickColor,
+            font: { size: 11, weight: "500", family: "Quicksand" }
           },
-          grid: { color: "rgba(0,0,0,.06)" }
+          grid: { color: gridColor }
         },
         y: {
           beginAtZero: false,
           grace: "10%",
           ticks: {
-            color: "#374151",
-            font: { size: 12, weight: "500" }
+            color: tickColor,
+            font: { size: 12, weight: "500", family: "Quicksand" }
           },
-          grid: { color: "rgba(0,0,0,.06)" }
+          grid: { color: gridColor }
         }
       }
     }
@@ -756,19 +917,54 @@ function exportImage(seriesFilter, dateFilter) {
     }));
   });
 
+  // 配色：与页面主题保持一致的低饱和莫兰迪少女色
+  const INK = "#4a3b42";
+  const MUTED = "#a4919a";
+  const LINE = "#ecdfe0";
+  const HEAD_BG_1 = "#f7e9ec";
+  const HEAD_BG_2 = "#f2dfe4";
+  const ROW_ALT = "#fbf3f1";
+  const CARD_BG_1 = "#fffdfb";
+  const CARD_BG_2 = "#faf1ee";
+  const PAGE_BG_1 = "#fdf6f2";
+  const PAGE_BG_2 = "#f3e8ea";
+  const PANEL_BG = "#fcf5f2";
+  const ACCENT_1 = "#b06a80";
+  const ACCENT_2 = "#a79bc4";
+
+  function roundRect(c, x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    c.beginPath();
+    c.moveTo(x + rr, y);
+    c.arcTo(x + w, y, x + w, y + h, rr);
+    c.arcTo(x + w, y + h, x, y + h, rr);
+    c.arcTo(x, y + h, x, y, rr);
+    c.arcTo(x, y, x + w, y, rr);
+    c.closePath();
+  }
+
   const scale = 3;
-  const pad = 56;
-  const titleH = 90;
-  const chartH = 520;
-  const minWidth = single ? 1200 : 1600;
-  // 导出图也按日期数量加宽，避免挤在一起
-  const width = Math.max(minWidth, dateList.length * 72 + pad * 2 + 100);
-  const colW = (width - pad * 2) / cols.length;
+  const outerMargin = 30;   // 卡片与画布边缘的留白
+  const pad = 44;           // 卡片内容内边距
+  const cardRadius = 26;
+  const titleH = 92;
+  const dividerH = 46;
+  const footerH = 40;
+  const chartH = 440;
+  const chartPad = 20;      // 折线图小面板内边距
   const rowH = 52;
   const tableH = rowH * (rows.length + 1);
-  const chartBoxW = width - pad * 2;
-  const gap = 36;
-  const height = pad + titleH + tableH + gap + chartH + pad;
+  const minWidth = single ? 1100 : 1500;
+
+  const contentW = Math.max(minWidth, dateList.length * 72 + 100) - pad * 2;
+  const width = contentW + pad * 2 + outerMargin * 2;
+  const colW = contentW / cols.length;
+  const chartBoxW = contentW - chartPad * 2;
+  const height = outerMargin * 2 + pad * 2 + titleH + tableH + dividerH + chartH + footerH;
+
+  const cardX = outerMargin, cardY = outerMargin;
+  const cardW = width - outerMargin * 2, cardH = height - outerMargin * 2;
+  const contentX = cardX + pad;
 
   const canvas = document.createElement("canvas");
   canvas.width = width * scale;
@@ -776,59 +972,135 @@ function exportImage(seriesFilter, dateFilter) {
   const ctx = canvas.getContext("2d");
   ctx.scale(scale, scale);
 
-  ctx.fillStyle = "#ffffff";
+  // 页面底色
+  const pageGrad = ctx.createLinearGradient(0, 0, width, height);
+  pageGrad.addColorStop(0, PAGE_BG_1);
+  pageGrad.addColorStop(1, PAGE_BG_2);
+  ctx.fillStyle = pageGrad;
   ctx.fillRect(0, 0, width, height);
 
-  ctx.fillStyle = "#111827";
-  ctx.font = "bold 40px PingFang SC, Noto Sans SC, sans-serif";
+  // 卡片主体（带柔和投影，把表格与折线图“装”进同一张卡片里）
+  ctx.save();
+  ctx.shadowColor = "rgba(150,110,120,.22)";
+  ctx.shadowBlur = 34;
+  ctx.shadowOffsetY = 12;
+  const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
+  cardGrad.addColorStop(0, CARD_BG_1);
+  cardGrad.addColorStop(1, CARD_BG_2);
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
+  ctx.fillStyle = cardGrad;
+  ctx.fill();
+  ctx.restore();
+
+  // 标题
+  let cursorY = cardY + pad;
+  ctx.fillStyle = INK;
+  ctx.font = "700 34px PingFang SC, Noto Sans SC, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(single ? ("月矿统计 · " + seriesList[0]) : "月矿统计", width / 2, pad + 38);
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "20px PingFang SC, Noto Sans SC, sans-serif";
-  ctx.fillText(single ? seriesList[0] + " · 表+图" : "表 + 图", width / 2, pad + 70);
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(single ? ("月矿统计 · " + seriesList[0]) : "月矿统计", width / 2, cursorY + 32);
+  ctx.fillStyle = MUTED;
+  ctx.font = "500 17px PingFang SC, Noto Sans SC, sans-serif";
+  ctx.fillText(single ? seriesList[0] + " · 数据一览" : "数据一览", width / 2, cursorY + 60);
+  // 标题下的小小装饰线，呼应页面渐变标题
+  const ruleGrad = ctx.createLinearGradient(width / 2 - 28, 0, width / 2 + 28, 0);
+  ruleGrad.addColorStop(0, ACCENT_1);
+  ruleGrad.addColorStop(1, ACCENT_2);
+  roundRect(ctx, width / 2 - 28, cursorY + 74, 56, 3, 2);
+  ctx.fillStyle = ruleGrad;
+  ctx.fill();
 
-  const tableX = pad;
-  const tableY = pad + titleH;
+  const tableY = cardY + pad + titleH;
 
+  // 表头（圆角面板，不再是一格格独立描边，读起来更整体）
+  roundRect(ctx, contentX, tableY, contentW, rowH, 14);
+  const headGrad = ctx.createLinearGradient(contentX, tableY, contentX, tableY + rowH);
+  headGrad.addColorStop(0, HEAD_BG_1);
+  headGrad.addColorStop(1, HEAD_BG_2);
+  ctx.fillStyle = headGrad;
+  ctx.fill();
   cols.forEach((c, i) => {
-    const x = tableX + i * colW;
-    ctx.fillStyle = "#f3f4f6";
-    ctx.fillRect(x, tableY, colW, rowH);
-    ctx.strokeStyle = "#d1d5db";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(x, tableY, colW, rowH);
-    ctx.fillStyle = "#111827";
-    ctx.font = "bold 22px PingFang SC, Noto Sans SC, sans-serif";
+    const x = contentX + i * colW;
+    ctx.fillStyle = INK;
+    ctx.font = "700 20px PingFang SC, Noto Sans SC, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(c, x + colW / 2, tableY + rowH / 2);
   });
 
+  // 表格主体：只用横向分隔线 + 首列竖线，去掉满屏网格，视觉更干净
   rows.forEach((r, ri) => {
+    const y = tableY + rowH + ri * rowH;
+    if (ri % 2 === 1) {
+      ctx.fillStyle = ROW_ALT;
+      ctx.fillRect(contentX, y, contentW, rowH);
+    }
     r.forEach((cell, i) => {
-      const x = tableX + i * colW;
-      const y = tableY + (ri + 1) * rowH;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(x, y, colW, rowH);
-      ctx.strokeStyle = "#d1d5db";
-      ctx.strokeRect(x, y, colW, rowH);
-      let color = "#111827";
+      const x = contentX + i * colW;
+      let color = INK;
       if (i > 0) {
         const sName = seriesList[i - 1];
         const si = Math.max(0, state.series.indexOf(sName));
         color = COLORS[si % COLORS.length];
       }
       ctx.fillStyle = color;
-      ctx.font = (i === 0 ? "bold " : "") + "22px PingFang SC, Noto Sans SC, sans-serif";
+      ctx.font = (i === 0 ? "700 " : "600 ") + "20px PingFang SC, Noto Sans SC, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(cell, x + colW / 2, y + rowH / 2);
     });
+    ctx.strokeStyle = LINE;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(contentX, y + rowH);
+    ctx.lineTo(contentX + contentW, y + rowH);
+    ctx.stroke();
   });
+  // 首列与数据列之间的分隔线，弱化但保留，方便对齐阅读
+  ctx.strokeStyle = LINE;
+  ctx.beginPath();
+  ctx.moveTo(contentX + colW, tableY);
+  ctx.lineTo(contentX + colW, tableY + tableH);
+  ctx.stroke();
+  roundRect(ctx, contentX, tableY, contentW, tableH, 14);
+  ctx.strokeStyle = LINE;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // 表格与折线图之间的“连接带”：一条渐变线 + 居中小标签，取代生硬的大片留白
+  const dividerY = tableY + tableH + dividerH / 2;
+  ctx.strokeStyle = LINE;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(contentX, dividerY);
+  ctx.lineTo(contentX + contentW, dividerY);
+  ctx.stroke();
+  ctx.font = "600 15px PingFang SC, Noto Sans SC, sans-serif";
+  const dividerLabel = "🌈 趋势图";
+  const labelW = ctx.measureText(dividerLabel).width + 28;
+  roundRect(ctx, width / 2 - labelW / 2, dividerY - 15, labelW, 30, 15);
+  ctx.fillStyle = CARD_BG_1;
+  ctx.fill();
+  ctx.strokeStyle = LINE;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = ACCENT_1;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(dividerLabel, width / 2, dividerY + 1);
+
+  // 折线图外层面板：与表格同宽、同圆角，视觉上和表格属于同一张卡片
+  const panelY = tableY + tableH + dividerH;
+  roundRect(ctx, contentX, panelY, contentW, chartH, 18);
+  ctx.fillStyle = PANEL_BG;
+  ctx.fill();
+  ctx.strokeStyle = LINE;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
 
   const hold = document.createElement("canvas");
   hold.width = chartBoxW;
-  hold.height = chartH;
+  hold.height = chartH - chartPad * 2;
   hold.style.position = "fixed";
   hold.style.left = "-9999px";
   document.body.appendChild(hold);
@@ -845,18 +1117,23 @@ function exportImage(seriesFilter, dateFilter) {
       responsive: false,
       maintainAspectRatio: false,
       devicePixelRatio: 3,
-      layout: { padding: { right: 100, top: 28, left: 8, bottom: 10 } },
+      layout: { padding: { right: 96, top: 24, left: 8, bottom: 8 } },
       plugins: { legend: { display: false } },
       scales: {
-        x: { offset: true, ticks: { autoSkip: false, maxRotation: 0, color: "#374151", font: { size: 14 } } },
-        y: { beginAtZero: false, grace: "8%", ticks: { color: "#374151", font: { size: 16 } } }
+        x: { offset: true, ticks: { autoSkip: false, maxRotation: 0, color: INK, font: { size: 13 } }, grid: { color: LINE } },
+        y: { beginAtZero: false, grace: "8%", ticks: { color: INK, font: { size: 14 } }, grid: { color: LINE } }
       }
     }
   });
 
   requestAnimationFrame(() => {
-    const y = tableY + tableH + gap;
-    ctx.drawImage(hold, pad, y, chartBoxW, chartH);
+    ctx.drawImage(hold, contentX + chartPad, panelY + chartPad, chartBoxW, chartH - chartPad * 2);
+    // 底部落款，和页面标题呼应，让整张图更像一张完整的卡片而非拼接截图
+    ctx.fillStyle = MUTED;
+    ctx.font = "500 14px PingFang SC, Noto Sans SC, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🌙 月矿统计", width / 2, panelY + chartH + footerH / 2 + 6);
     downloadCanvas(canvas, single ? ("月矿统计-" + seriesList[0] + ".png") : "月矿统计.png");
     hi.destroy();
     hold.remove();
