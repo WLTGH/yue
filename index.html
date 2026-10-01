@@ -827,17 +827,27 @@
         <button type="button" class="btn red" id="clearBtn">🗑 清空全部数据</button>
       </div>
     </div>
+
+    <div class="side-section">
+      <h3>本地存储</h3>
+      <p class="side-hint" id="storageStatusHint">正在检测…</p>
+      <p class="side-hint">数据保存在本机浏览器中。请固定用同一浏览器打开同一文件；换文件路径、无痕模式或微信内打开可能导致读不到旧数据。重要数据请「复制 JSON」备份。</p>
+    </div>
   </aside>
 
 <script>
 const COLORS = ["#c98a9c", "#a79bc4", "#8fb3a0", "#d9a66c", "#8aa3c2", "#b98aa0", "#a68a6a"];
 const storeKey = "moon-ore-stats-v3";
+// 兼容历史上用过的键，打开时自动迁移，避免「数据不见了」
+const legacyStoreKeys = ["moon-ore-stats-v2", "moon-ore-stats", "moon-ore-stats-v1", ""];
 
 const state = { series: [], dates: [], values: {} };
 const selectedSeries = new Set();
 const selectedDates = new Set();
 const PAGE_SIZE = 10;
 let tablePage = 0; // 0-based
+let storageOk = true;
+let storageWarnShown = false;
 
 function fmtMD(iso) {
   if (!iso) return "";
@@ -850,20 +860,89 @@ function todayISO() {
   return new Date(d - tz).toISOString().slice(0, 10);
 }
 
-function load() {
+function canUseLocalStorage() {
   try {
-    const raw = localStorage.getItem(storeKey);
-    if (!raw) return false;
+    const k = "__moon_ore_probe__";
+    localStorage.setItem(k, "1");
+    localStorage.removeItem(k);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function parseStorePayload(raw) {
+  if (!raw) return null;
+  try {
     const parsed = JSON.parse(raw);
-    state.series = parsed.series || [];
-    state.dates = parsed.dates || [];
-    state.values = parsed.values || {};
-    return state.series.length > 0 || state.dates.length > 0;
-  } catch { return false; }
+    if (!parsed || typeof parsed !== "object") return null;
+    const series = Array.isArray(parsed.series) ? parsed.series : [];
+    const dates = Array.isArray(parsed.dates) ? parsed.dates : [];
+    const values = parsed.values && typeof parsed.values === "object" ? parsed.values : {};
+    if (!series.length && !dates.length) return null;
+    return { series, dates, values };
+  } catch {
+    return null;
+  }
+}
+
+function applyStatePayload(payload) {
+  state.series = payload.series.slice();
+  state.dates = payload.dates.slice();
+  state.values = JSON.parse(JSON.stringify(payload.values));
+}
+
+function load() {
+  storageOk = canUseLocalStorage();
+  if (!storageOk) return false;
+  try {
+    // 1) 当前键
+    let payload = parseStorePayload(localStorage.getItem(storeKey));
+    // 2) 旧键迁移
+    if (!payload) {
+      for (const key of legacyStoreKeys) {
+        payload = parseStorePayload(localStorage.getItem(key));
+        if (payload) {
+          // 写回新键，并尽量清掉旧键（空字符串键也尝试清除）
+          try { localStorage.setItem(storeKey, JSON.stringify(payload)); } catch (_) {}
+          try { if (key !== storeKey) localStorage.removeItem(key); } catch (_) {}
+          break;
+        }
+      }
+    }
+    if (!payload) return false;
+    applyStatePayload(payload);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function save() {
-  localStorage.setItem(storeKey, JSON.stringify(state));
+  if (!storageOk && !canUseLocalStorage()) {
+    storageOk = false;
+    if (!storageWarnShown) {
+      storageWarnShown = true;
+      alert("当前环境无法使用本地存储（可能是无痕模式、系统限制，或用微信等内置浏览器打开本地文件）。数据不会自动保存，请用「复制 JSON」备份。");
+    }
+    return false;
+  }
+  storageOk = true;
+  try {
+    const payload = JSON.stringify(state);
+    localStorage.setItem(storeKey, payload);
+    // 读回校验，防止静默失败
+    const check = localStorage.getItem(storeKey);
+    if (check !== payload) throw new Error("storage verify failed");
+    return true;
+  } catch (err) {
+    storageOk = false;
+    if (!storageWarnShown) {
+      storageWarnShown = true;
+      alert("本地保存失败（存储空间不足或权限受限）。请用「复制 JSON」备份数据。");
+    }
+    return false;
+  }
 }
 
 function ensure(date, series) {
@@ -1747,8 +1826,41 @@ document.addEventListener("keydown", e => {
 });
 
 // 无内置示例数据：首次打开保持空白
-load();
+const hadData = load();
 render();
+
+function updateStorageStatusHint() {
+  const el = document.getElementById("storageStatusHint");
+  if (!el) return;
+  if (!storageOk) {
+    el.textContent = "⚠️ 本地存储不可用，数据不会自动保存。请复制 JSON 备份。";
+    el.style.color = "var(--coral)";
+    return;
+  }
+  const n = state.series.length + state.dates.length;
+  el.textContent = hadData || n
+    ? "✓ 本地存储可用，数据会自动保存在本机。"
+    : "✓ 本地存储可用。添加数据后会自动保存。";
+  el.style.color = "var(--mint)";
+}
+updateStorageStatusHint();
+
+// 离开页面前再保存一次，防止个别场景漏写
+window.addEventListener("pagehide", () => { try { save(); } catch (_) {} });
+window.addEventListener("beforeunload", () => { try { save(); } catch (_) {} });
+// 从后台回到前台时重新加载（多标签页同步）
+window.addEventListener("storage", (e) => {
+  if (e.key === storeKey && e.newValue) {
+    const payload = parseStorePayload(e.newValue);
+    if (payload) {
+      applyStatePayload(payload);
+      selectedSeries.clear();
+      selectedDates.clear();
+      render();
+      updateStorageStatusHint();
+    }
+  }
+});
 </script>
 </body>
 </html>
