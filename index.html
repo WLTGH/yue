@@ -83,6 +83,15 @@
     * { box-sizing: border-box; }
     html, body { background: var(--bg-1); }
     html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+    /* 取消原生点击高亮 / 长按菜单等默认特效 */
+    html, body, button, a, input, select, textarea, label, [role="button"] {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+    button, input, select, textarea {
+      appearance: none;
+      -webkit-appearance: none;
+    }
     body {
       margin: 0;
       font-family: "Quicksand", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -196,13 +205,24 @@
       padding: 10px 12px;
       background: var(--input-bg);
       color: var(--text);
-      transition: border-color .15s ease, box-shadow .15s ease;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
+    input[type="text"]:hover, input[type="number"]:hover, input[type="date"]:hover {
+      border-color: color-mix(in srgb, var(--pink) 45%, var(--card-border));
     }
     input:focus {
       outline: none;
       border-color: var(--pink);
       box-shadow: 0 0 0 4px var(--pink-soft);
     }
+    /* number 输入去掉原生步进箭头（部分浏览器） */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
     .row {
       display: flex;
@@ -212,23 +232,49 @@
     }
     .row > div { flex: 1; min-width: 0; }
 
-    /* ---- 按钮：圆润渐变糖果风 ---- */
+    /* ---- 按钮：自定义按压，无原生高亮 ---- */
     .btn {
       border: 1px solid transparent;
       border-radius: 999px;
       padding: 10px 16px;
-      background: var(--pink-deep);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--pink-deep) 92%, #fff), var(--pink-deep));
       color: #fff9fa;
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
-      box-shadow: 0 4px 12px var(--shadow-color);
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      box-shadow: 0 4px 14px var(--shadow-color), inset 0 1px 0 rgba(255,255,255,.18);
+      outline: none;
+      user-select: none;
+      -webkit-user-select: none;
+      transition:
+        transform .16s cubic-bezier(.22, .9, .3, 1),
+        box-shadow .16s ease,
+        filter .16s ease,
+        background .16s ease,
+        border-color .16s ease,
+        color .16s ease;
     }
-    .btn:hover { filter: brightness(1.06); }
-    .btn:active { transform: scale(.96); box-shadow: 0 2px 6px var(--shadow-color); }
+    .btn:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 6px 18px var(--shadow-color), inset 0 1px 0 rgba(255,255,255,.22);
+    }
+    .btn:active {
+      transform: scale(.97) translateY(1px);
+      filter: brightness(.97);
+      box-shadow: 0 1px 4px var(--shadow-color), inset 0 2px 4px rgba(0,0,0,.08);
+    }
+    .btn:focus-visible {
+      box-shadow: 0 0 0 3px var(--pink-soft), 0 4px 14px var(--shadow-color);
+    }
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none !important;
+      filter: none !important;
+      box-shadow: none;
+    }
     .btn.green {
-      background: var(--mint);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--mint) 88%, #fff), var(--mint));
       color: #23392f;
     }
     .btn.gray {
@@ -237,11 +283,25 @@
       box-shadow: none;
       border-color: var(--card-border);
     }
+    .btn.gray:hover {
+      background: color-mix(in srgb, var(--violet-soft) 70%, var(--pink-soft));
+      border-color: color-mix(in srgb, var(--violet) 35%, var(--card-border));
+    }
+    .btn.gray:active {
+      background: color-mix(in srgb, var(--violet-soft) 55%, var(--card-border));
+    }
     .btn.red {
       background: var(--coral-soft);
       color: var(--coral);
       box-shadow: none;
       border-color: var(--card-border);
+    }
+    .btn.red:hover {
+      background: color-mix(in srgb, var(--coral-soft) 75%, #fff);
+      border-color: color-mix(in srgb, var(--coral) 40%, var(--card-border));
+    }
+    .btn.red:active {
+      background: color-mix(in srgb, var(--coral-soft) 60%, var(--card-border));
     }
     .btn.small { padding: 6px 11px; font-size: 12px; }
 
@@ -261,12 +321,19 @@
       font-weight: 600;
       background: var(--chip-bg);
       color: var(--text);
+      transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+    }
+    .chip:has(input:checked) {
+      border-color: color-mix(in srgb, var(--pink) 55%, var(--card-border));
+      background: color-mix(in srgb, var(--pink-soft) 55%, var(--chip-bg));
+      box-shadow: 0 0 0 2px var(--pink-soft);
     }
     .chip input[type="checkbox"] {
       width: 16px;
       height: 16px;
       margin: 0;
       accent-color: var(--pink);
+      cursor: pointer;
     }
     .drawer-actions {
       display: flex;
@@ -307,8 +374,15 @@
       font-size: 13px;
       font-weight: 700;
       text-align: left;
+      outline: none;
+      user-select: none;
+      transition: filter .15s ease, background .15s ease;
     }
-    .drawer-head:hover { filter: brightness(1.02); }
+    .drawer-head:hover { filter: brightness(1.03); }
+    .drawer-head:active { filter: brightness(.97); }
+    .drawer-head:focus-visible {
+      box-shadow: inset 0 0 0 2px var(--pink);
+    }
     .drawer-head .arrow {
       transition: transform .2s ease;
       color: var(--pink);
@@ -434,6 +508,193 @@
       flex-wrap: wrap;
       gap: 8px;
     }
+
+    /* ---- 侧面抽屉 ---- */
+    .menu-fab {
+      position: fixed;
+      top: calc(14px + env(safe-area-inset-top, 0px));
+      right: calc(14px + env(safe-area-inset-right, 0px));
+      z-index: 40;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+      box-shadow: 0 8px 22px var(--shadow-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition:
+        transform .18s cubic-bezier(.22, .9, .3, 1),
+        box-shadow .18s ease,
+        border-color .18s ease,
+        background .18s ease;
+    }
+    .menu-fab:hover {
+      border-color: color-mix(in srgb, var(--pink) 40%, var(--card-border));
+      box-shadow: 0 10px 26px var(--shadow-color);
+    }
+    .menu-fab:active {
+      transform: scale(.92);
+      box-shadow: 0 3px 10px var(--shadow-color);
+    }
+    .menu-fab:focus-visible {
+      box-shadow: 0 0 0 3px var(--pink-soft), 0 8px 22px var(--shadow-color);
+    }
+
+    .side-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(40, 28, 36, .28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease;
+    }
+    .side-mask.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .side-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 60;
+      width: min(320px, 88vw);
+      height: 100%;
+      height: 100dvh;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border-left: 1px solid var(--card-border);
+      box-shadow: -12px 0 36px var(--shadow-color);
+      transform: translateX(105%);
+      transition: transform .26s cubic-bezier(.22, .9, .3, 1);
+      display: flex;
+      flex-direction: column;
+      padding:
+        calc(16px + env(safe-area-inset-top, 0px))
+        calc(16px + env(safe-area-inset-right, 0px))
+        calc(16px + env(safe-area-inset-bottom, 0px))
+        16px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .side-drawer.open { transform: translateX(0); }
+
+    .side-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .side-head h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .side-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid var(--card-border);
+      background: var(--chip-bg);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
+    }
+    .side-close:hover {
+      border-color: color-mix(in srgb, var(--pink) 40%, var(--card-border));
+      background: color-mix(in srgb, var(--pink-soft) 40%, var(--chip-bg));
+    }
+    .side-close:active { transform: scale(.9); }
+    .side-close:focus-visible {
+      box-shadow: 0 0 0 3px var(--pink-soft);
+    }
+
+    .side-section {
+      margin-bottom: 18px;
+    }
+    .side-section h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .4px;
+    }
+    .side-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .side-actions .btn {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      padding: 11px 14px;
+    }
+    .side-hint {
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.45;
+    }
+    .side-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      background: var(--chip-bg);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      margin-bottom: 8px;
+      transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+    .side-check:hover {
+      border-color: color-mix(in srgb, var(--pink) 40%, var(--card-border));
+    }
+    .side-check:has(input:checked) {
+      border-color: color-mix(in srgb, var(--pink) 55%, var(--card-border));
+      background: color-mix(in srgb, var(--pink-soft) 50%, var(--chip-bg));
+      box-shadow: 0 0 0 2px var(--pink-soft);
+    }
+    .side-check:active {
+      transform: scale(.99);
+    }
+    .side-check input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--pink);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    body.side-open { overflow: hidden; }
   </style>
 </head>
 <body>
@@ -524,20 +785,53 @@
       </div>
     </div>
 
-    <div class="card">
-      <h2><span class="ico">💌</span>数据管理</h2>
-      <div class="actions">
-        <button class="btn small" id="exportImgBtn">导出图片</button>
-        <button class="btn gray small" id="exportBtn">复制 JSON</button>
-        <button class="btn gray small" id="importBtn">粘贴导入</button>
-        <button class="btn red small" id="clearBtn">清空数据</button>
+  </div>
+
+  <!-- 右上角菜单按钮 -->
+  <button type="button" class="menu-fab" id="menuFab" aria-label="打开菜单" title="数据管理">☰</button>
+
+  <!-- 遮罩 -->
+  <div class="side-mask" id="sideMask" aria-hidden="true"></div>
+
+  <!-- 侧面抽屉 -->
+  <aside class="side-drawer" id="sideDrawer" aria-label="数据管理" aria-hidden="true">
+    <div class="side-head">
+      <h2><span>💌</span>数据管理</h2>
+      <button type="button" class="side-close" id="sideCloseBtn" aria-label="关闭">✕</button>
+    </div>
+
+    <div class="side-section">
+      <h3>导出</h3>
+      <label class="side-check" for="exportChartCheck">
+        <input type="checkbox" id="exportChartCheck" checked />
+        <span>同时导出折线图</span>
+      </label>
+      <div class="side-actions">
+        <button type="button" class="btn" id="exportImgBtn">📷 导出图片</button>
+        <button type="button" class="btn gray" id="exportBtn">📋 复制 JSON</button>
+      </div>
+      <p class="side-hint">导出图片会按勾选的角色/日期筛选；未勾选则导出全部。可取消上方勾选，只导出数据表。</p>
+    </div>
+
+    <div class="side-section">
+      <h3>导入</h3>
+      <div class="side-actions">
+        <button type="button" class="btn gray" id="importBtn">📥 粘贴导入</button>
+      </div>
+      <p class="side-hint">从剪贴板读取 JSON；不支持时会弹出输入框。</p>
+    </div>
+
+    <div class="side-section">
+      <h3>危险操作</h3>
+      <div class="side-actions">
+        <button type="button" class="btn red" id="clearBtn">🗑 清空全部数据</button>
       </div>
     </div>
-  </div>
+  </aside>
 
 <script>
 const COLORS = ["#c98a9c", "#a79bc4", "#8fb3a0", "#d9a66c", "#8aa3c2", "#b98aa0", "#a68a6a"];
-const storeKey = "";
+const storeKey = "moon-ore-stats-v3";
 
 const state = { series: [], dates: [], values: {} };
 const selectedSeries = new Set();
@@ -1143,14 +1437,17 @@ function exportImage(seriesFilter, dateFilter) {
     c.closePath();
   }
 
+  // 是否导出折线图（侧栏勾选）
+  const includeChart = !!(document.getElementById("exportChartCheck") && document.getElementById("exportChartCheck").checked);
+
   const scale = 3;
   const outerMargin = 30;   // 卡片与画布边缘的留白
   const pad = 44;           // 卡片内容内边距
   const cardRadius = 26;
   const titleH = 92;
-  const dividerH = 46;
+  const dividerH = includeChart ? 46 : 0;
   const footerH = 40;
-  const chartH = 440;
+  const chartH = includeChart ? 440 : 0;
   const chartPad = 20;      // 折线图小面板内边距
   const rowH = 68;          // 增高以容纳数值 + 较上期增长
   const tableH = rowH * (rows.length + 1);
@@ -1280,7 +1577,22 @@ function exportImage(seriesFilter, dateFilter) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // 表格与折线图之间的“连接带”：一条渐变线 + 居中小标签，取代生硬的大片留白
+  function finishExport(footerY) {
+    ctx.fillStyle = MUTED;
+    ctx.font = "500 14px PingFang SC, Noto Sans SC, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🌙 月矿统计", width / 2, footerY);
+    downloadCanvas(canvas, single ? ("月矿统计-" + seriesList[0] + ".png") : "月矿统计.png");
+  }
+
+  if (!includeChart) {
+    // 仅表格：落款紧跟表格
+    finishExport(tableY + tableH + footerH / 2 + 6);
+    return;
+  }
+
+  // 表格与折线图之间的“连接带”：一条渐变线 + 居中小标签
   const dividerY = tableY + tableH + dividerH / 2;
   ctx.strokeStyle = LINE;
   ctx.lineWidth = 1;
@@ -1302,7 +1614,7 @@ function exportImage(seriesFilter, dateFilter) {
   ctx.textBaseline = "middle";
   ctx.fillText(dividerLabel, width / 2, dividerY + 1);
 
-  // 折线图外层面板：与表格同宽、同圆角，视觉上和表格属于同一张卡片
+  // 折线图外层面板
   const panelY = tableY + tableH + dividerH;
   roundRect(ctx, contentX, panelY, contentW, chartH, 18);
   ctx.fillStyle = PANEL_BG;
@@ -1341,13 +1653,7 @@ function exportImage(seriesFilter, dateFilter) {
 
   requestAnimationFrame(() => {
     ctx.drawImage(hold, contentX + chartPad, panelY + chartPad, chartBoxW, chartH - chartPad * 2);
-    // 底部落款，和页面标题呼应，让整张图更像一张完整的卡片而非拼接截图
-    ctx.fillStyle = MUTED;
-    ctx.font = "500 14px PingFang SC, Noto Sans SC, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🌙 月矿统计", width / 2, panelY + chartH + footerH / 2 + 6);
-    downloadCanvas(canvas, single ? ("月矿统计-" + seriesList[0] + ".png") : "月矿统计.png");
+    finishExport(panelY + chartH + footerH / 2 + 6);
     hi.destroy();
     hold.remove();
   });
@@ -1418,17 +1724,30 @@ document.getElementById("importBtn").onclick = async () => {
 
 document.getElementById("oneDate").value = todayISO();
 
-if (!load()) {
-  state.series = ["WLT", "断剑重铸之日", "亚当"];
-  state.dates = ["2026-08-12", "2026-08-19", "2026-08-26", "2026-09-01"];
-  state.values = {
-    "2026-08-12": { "WLT": 2635, "断剑重铸之日": 2508, "亚当": 2766 },
-    "2026-08-19": { "WLT": 2712, "断剑重铸之日": 2583, "亚当": 2841 },
-    "2026-08-26": { "WLT": 2760, "断剑重铸之日": 2556, "亚当": 2912 },
-    "2026-09-01": { "WLT": 2781, "断剑重铸之日": 2550, "亚当": 2955 }
-  };
-  save();
+// 侧面抽屉开关
+function openSideDrawer() {
+  document.getElementById("sideDrawer").classList.add("open");
+  document.getElementById("sideMask").classList.add("open");
+  document.getElementById("sideDrawer").setAttribute("aria-hidden", "false");
+  document.getElementById("sideMask").setAttribute("aria-hidden", "false");
+  document.body.classList.add("side-open");
 }
+function closeSideDrawer() {
+  document.getElementById("sideDrawer").classList.remove("open");
+  document.getElementById("sideMask").classList.remove("open");
+  document.getElementById("sideDrawer").setAttribute("aria-hidden", "true");
+  document.getElementById("sideMask").setAttribute("aria-hidden", "true");
+  document.body.classList.remove("side-open");
+}
+document.getElementById("menuFab").onclick = openSideDrawer;
+document.getElementById("sideCloseBtn").onclick = closeSideDrawer;
+document.getElementById("sideMask").onclick = closeSideDrawer;
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeSideDrawer();
+});
+
+// 无内置示例数据：首次打开保持空白
+load();
 render();
 </script>
 </body>
