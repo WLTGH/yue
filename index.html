@@ -382,6 +382,40 @@
     .growth.down { color: var(--coral); }
     .growth.flat { color: var(--muted); }
     .growth.na { color: var(--muted); opacity: .7; }
+
+    .pager {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      min-height: 36px;
+    }
+    .pager.hidden { display: none; }
+    .pager-info {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 4px;
+      white-space: nowrap;
+    }
+    .pager .btn {
+      min-width: 36px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .pager .btn.active {
+      background: var(--pink-deep);
+      color: #fff9fa;
+      box-shadow: 0 4px 12px var(--shadow-color);
+      border-color: transparent;
+    }
+    .pager .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
     .chart-scroll {
       width: 100%;
       overflow-x: auto;
@@ -471,13 +505,14 @@
 
     <div class="card">
       <h2><span class="ico">📋</span>数据表格</h2>
-      <p class="hint" style="margin:-4px 0 10px;">每个数值下方为「较上期增长」；首期或无上期数据时显示 —</p>
+      <p class="hint" style="margin:-4px 0 10px;">每个数值下方为「较上期增长」；首期或无上期数据时显示 — · 每页 10 条</p>
       <div class="table-wrap">
         <table>
           <thead id="thead"></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
+      <div class="pager hidden" id="tablePager" aria-label="表格分页"></div>
     </div>
 
     <div class="card">
@@ -502,11 +537,13 @@
 
 <script>
 const COLORS = ["#c98a9c", "#a79bc4", "#8fb3a0", "#d9a66c", "#8aa3c2", "#b98aa0", "#a68a6a"];
-const storeKey = "moon-ore-stats-v2";
+const storeKey = "";
 
 const state = { series: [], dates: [], values: {} };
 const selectedSeries = new Set();
 const selectedDates = new Set();
+const PAGE_SIZE = 10;
+let tablePage = 0; // 0-based
 
 function fmtMD(iso) {
   if (!iso) return "";
@@ -562,6 +599,9 @@ function addDate(date) {
   state.dates.push(date);
   state.dates.sort();
   state.series.forEach(s => ensure(date, s));
+  // 跳到新日期所在页，方便立刻填写
+  const idx = state.dates.indexOf(date);
+  tablePage = Math.floor(idx / PAGE_SIZE);
   save(); render();
 }
 
@@ -639,10 +679,10 @@ function refreshGrowthForSeries(series) {
   if (!tbody) return;
   const colIdx = state.series.indexOf(series);
   if (colIdx < 0) return;
-  // 表格列：0=日期，1..=角色
   const tdIdx = colIdx + 1;
+  const pageDates = getPageDates();
   const rows = tbody.querySelectorAll("tr");
-  state.dates.forEach((date, ri) => {
+  pageDates.forEach((date, ri) => {
     const tr = rows[ri];
     if (!tr) return;
     const td = tr.children[tdIdx];
@@ -653,6 +693,61 @@ function refreshGrowthForSeries(series) {
     gEl.className = "growth " + (g ? g.cls : "na");
     gEl.textContent = g ? g.text : "—";
     gEl.title = g ? ("较上期 " + g.text) : "无上期对比";
+  });
+}
+
+function getTotalPages() {
+  return Math.max(1, Math.ceil(state.dates.length / PAGE_SIZE) || 1);
+}
+
+function clampTablePage() {
+  const total = getTotalPages();
+  if (tablePage >= total) tablePage = Math.max(0, total - 1);
+  if (tablePage < 0) tablePage = 0;
+}
+
+function getPageDates() {
+  clampTablePage();
+  const start = tablePage * PAGE_SIZE;
+  return state.dates.slice(start, start + PAGE_SIZE);
+}
+
+function goTablePage(p) {
+  tablePage = p;
+  clampTablePage();
+  renderTable();
+}
+
+function renderPager() {
+  const pager = document.getElementById("tablePager");
+  if (!pager) return;
+  const total = state.dates.length;
+  const pages = getTotalPages();
+  if (total <= PAGE_SIZE) {
+    pager.classList.add("hidden");
+    pager.innerHTML = "";
+    return;
+  }
+  pager.classList.remove("hidden");
+  const start = tablePage * PAGE_SIZE + 1;
+  const end = Math.min((tablePage + 1) * PAGE_SIZE, total);
+  let html = "";
+  html += '<button type="button" class="btn gray small" data-page="prev"' + (tablePage === 0 ? " disabled" : "") + ">‹ 上一页</button>";
+  for (let i = 0; i < pages; i++) {
+    const active = i === tablePage ? " active" : "";
+    html += '<button type="button" class="btn gray small' + active + '" data-page="' + i + '">' + (i + 1) + "</button>";
+  }
+  html += '<button type="button" class="btn gray small" data-page="next"' + (tablePage >= pages - 1 ? " disabled" : "") + ">下一页 ›</button>";
+  html += '<span class="pager-info">' + start + "–" + end + " / " + total + "</span>";
+  pager.innerHTML = html;
+  pager.querySelectorAll("[data-page]").forEach(btn => {
+    btn.onclick = () => {
+      if (btn.disabled) return;
+      const v = btn.getAttribute("data-page");
+      if (v === "prev") goTablePage(tablePage - 1);
+      else if (v === "next") goTablePage(tablePage + 1);
+      else goTablePage(Number(v));
+    };
   });
 }
 
@@ -743,42 +838,54 @@ function renderTable() {
   const tbody = document.getElementById("tbody");
   thead.innerHTML = "";
   tbody.innerHTML = "";
+  clampTablePage();
 
   const trh = document.createElement("tr");
   trh.innerHTML = "<th>日期</th>" + state.series.map(s => "<th>" + s + "</th>").join("");
   thead.appendChild(trh);
 
-  state.dates.forEach(date => {
+  const pageDates = getPageDates();
+  if (!state.dates.length) {
     const tr = document.createElement("tr");
-    const dateTd = document.createElement("td");
-    dateTd.innerHTML = "<div style=\"display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;\"><b>" + fmtMD(date) + "</b></div>";
-    const del = document.createElement("button");
-    del.className = "btn red small";
-    del.textContent = "删";
-    del.onclick = () => removeDate(date);
-    dateTd.firstChild.appendChild(del);
-    tr.appendChild(dateTd);
-    state.series.forEach(series => {
-      const td = document.createElement("td");
-      const wrap = document.createElement("div");
-      wrap.className = "cell-val";
-      const input = document.createElement("input");
-      input.type = "number";
-      input.step = "any";
-      input.value = state.values[date] && state.values[date][series] != null ? state.values[date][series] : "";
-      input.addEventListener("input", () => setValue(date, series, input.value));
-      wrap.appendChild(input);
-      const g = getGrowth(date, series);
-      const gEl = document.createElement("span");
-      gEl.className = "growth " + (g ? g.cls : "na");
-      gEl.textContent = g ? g.text : (state.dates.indexOf(date) === 0 ? "—" : "—");
-      gEl.title = g ? ("较上期 " + g.text) : "无上期对比";
-      wrap.appendChild(gEl);
-      td.appendChild(wrap);
-      tr.appendChild(td);
-    });
+    const td = document.createElement("td");
+    td.colSpan = Math.max(1, state.series.length + 1);
+    td.innerHTML = '<span class="hint">还没有日期数据</span>';
+    tr.appendChild(td);
     tbody.appendChild(tr);
-  });
+  } else {
+    pageDates.forEach(date => {
+      const tr = document.createElement("tr");
+      const dateTd = document.createElement("td");
+      dateTd.innerHTML = "<div style=\"display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;\"><b>" + fmtMD(date) + "</b></div>";
+      const del = document.createElement("button");
+      del.className = "btn red small";
+      del.textContent = "删";
+      del.onclick = () => removeDate(date);
+      dateTd.firstChild.appendChild(del);
+      tr.appendChild(dateTd);
+      state.series.forEach(series => {
+        const td = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.className = "cell-val";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.step = "any";
+        input.value = state.values[date] && state.values[date][series] != null ? state.values[date][series] : "";
+        input.addEventListener("input", () => setValue(date, series, input.value));
+        wrap.appendChild(input);
+        const g = getGrowth(date, series);
+        const gEl = document.createElement("span");
+        gEl.className = "growth " + (g ? g.cls : "na");
+        gEl.textContent = g ? g.text : "—";
+        gEl.title = g ? ("较上期 " + g.text) : "无上期对比";
+        wrap.appendChild(gEl);
+        td.appendChild(wrap);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+  renderPager();
 }
 
 const lineNamePlugin = {
