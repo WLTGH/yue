@@ -361,6 +361,27 @@
       margin: 6px 0 0;
       font-weight: 500;
     }
+    .cell-val {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .cell-val input {
+      width: 100%;
+      max-width: 88px;
+    }
+    .growth {
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      letter-spacing: .2px;
+    }
+    .growth.up { color: var(--mint); }
+    .growth.down { color: var(--coral); }
+    .growth.flat { color: var(--muted); }
+    .growth.na { color: var(--muted); opacity: .7; }
     .chart-scroll {
       width: 100%;
       overflow-x: auto;
@@ -450,6 +471,7 @@
 
     <div class="card">
       <h2><span class="ico">📋</span>数据表格</h2>
+      <p class="hint" style="margin:-4px 0 10px;">每个数值下方为「较上期增长」；首期或无上期数据时显示 —</p>
       <div class="table-wrap">
         <table>
           <thead id="thead"></thead>
@@ -607,7 +629,59 @@ function setValue(date, series, value) {
   ensure(date, series);
   state.values[date][series] = value;
   save();
+  // 只刷新该列相关单元格的增长显示，避免整表重绘导致输入失焦
+  refreshGrowthForSeries(series);
   updateChart();
+}
+
+function refreshGrowthForSeries(series) {
+  const tbody = document.getElementById("tbody");
+  if (!tbody) return;
+  const colIdx = state.series.indexOf(series);
+  if (colIdx < 0) return;
+  // 表格列：0=日期，1..=角色
+  const tdIdx = colIdx + 1;
+  const rows = tbody.querySelectorAll("tr");
+  state.dates.forEach((date, ri) => {
+    const tr = rows[ri];
+    if (!tr) return;
+    const td = tr.children[tdIdx];
+    if (!td) return;
+    const gEl = td.querySelector(".growth");
+    if (!gEl) return;
+    const g = getGrowth(date, series);
+    gEl.className = "growth " + (g ? g.cls : "na");
+    gEl.textContent = g ? g.text : "—";
+    gEl.title = g ? ("较上期 " + g.text) : "无上期对比";
+  });
+}
+
+/** 计算某角色在某日期相对上一期的增长量。返回 { delta, text, cls } 或 null（首期/无数据） */
+function getGrowth(date, series, dateList) {
+  const dates = dateList && dateList.length ? dateList : state.dates;
+  const idx = dates.indexOf(date);
+  if (idx <= 0) return null;
+  const prev = dates[idx - 1];
+  const curRaw = state.values[date] ? state.values[date][series] : "";
+  const prevRaw = state.values[prev] ? state.values[prev][series] : "";
+  if (curRaw === "" || curRaw == null || prevRaw === "" || prevRaw == null) return null;
+  const cur = Number(curRaw);
+  const prv = Number(prevRaw);
+  if (!Number.isFinite(cur) || !Number.isFinite(prv)) return null;
+  const delta = cur - prv;
+  const rounded = Math.round(delta * 1000) / 1000;
+  let text, cls;
+  if (rounded > 0) {
+    text = "+" + rounded;
+    cls = "up";
+  } else if (rounded < 0) {
+    text = String(rounded);
+    cls = "down";
+  } else {
+    text = "0";
+    cls = "flat";
+  }
+  return { delta: rounded, text, cls };
 }
 
 function renderChips() {
@@ -686,12 +760,21 @@ function renderTable() {
     tr.appendChild(dateTd);
     state.series.forEach(series => {
       const td = document.createElement("td");
+      const wrap = document.createElement("div");
+      wrap.className = "cell-val";
       const input = document.createElement("input");
       input.type = "number";
       input.step = "any";
       input.value = state.values[date] && state.values[date][series] != null ? state.values[date][series] : "";
       input.addEventListener("input", () => setValue(date, series, input.value));
-      td.appendChild(input);
+      wrap.appendChild(input);
+      const g = getGrowth(date, series);
+      const gEl = document.createElement("span");
+      gEl.className = "growth " + (g ? g.cls : "na");
+      gEl.textContent = g ? g.text : (state.dates.indexOf(date) === 0 ? "—" : "—");
+      gEl.title = g ? ("较上期 " + g.text) : "无上期对比";
+      wrap.appendChild(gEl);
+      td.appendChild(wrap);
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -910,10 +993,17 @@ function exportImage(seriesFilter, dateFilter) {
   }
   const single = seriesList.length === 1;
   const cols = ["日期"].concat(seriesList);
+  // 每格：{ value, growthText, growthCls }；日期列只有 value
   const rows = dateList.map(date => {
-    return [fmtMD(date)].concat(seriesList.map(s => {
+    return [{ value: fmtMD(date), growthText: null, growthCls: null }].concat(seriesList.map(s => {
       const v = state.values[date] ? state.values[date][s] : "";
-      return v == null || v === "" ? "-" : String(v);
+      const valStr = v == null || v === "" ? "-" : String(v);
+      const g = getGrowth(date, s, dateList);
+      return {
+        value: valStr,
+        growthText: g ? g.text : (dateList.indexOf(date) === 0 ? "—" : "—"),
+        growthCls: g ? g.cls : "na"
+      };
     }));
   });
 
@@ -931,6 +1021,9 @@ function exportImage(seriesFilter, dateFilter) {
   const PANEL_BG = "#fcf5f2";
   const ACCENT_1 = "#b06a80";
   const ACCENT_2 = "#a79bc4";
+  const GROW_UP = "#5a9a72";
+  const GROW_DOWN = "#c98576";
+  const GROW_FLAT = "#a4919a";
 
   function roundRect(c, x, y, w, h, r) {
     const rr = Math.min(r, w / 2, h / 2);
@@ -952,7 +1045,7 @@ function exportImage(seriesFilter, dateFilter) {
   const footerH = 40;
   const chartH = 440;
   const chartPad = 20;      // 折线图小面板内边距
-  const rowH = 52;
+  const rowH = 68;          // 增高以容纳数值 + 较上期增长
   const tableH = rowH * (rows.length + 1);
   const minWidth = single ? 1100 : 1500;
 
@@ -1028,7 +1121,7 @@ function exportImage(seriesFilter, dateFilter) {
     ctx.fillText(c, x + colW / 2, tableY + rowH / 2);
   });
 
-  // 表格主体：只用横向分隔线 + 首列竖线，去掉满屏网格，视觉更干净
+  // 表格主体：数值 + 较上期增长；只用横向分隔线 + 首列竖线
   rows.forEach((r, ri) => {
     const y = tableY + rowH + ri * rowH;
     if (ri % 2 === 1) {
@@ -1037,17 +1130,30 @@ function exportImage(seriesFilter, dateFilter) {
     }
     r.forEach((cell, i) => {
       const x = contentX + i * colW;
-      let color = INK;
-      if (i > 0) {
+      const cx = x + colW / 2;
+      if (i === 0) {
+        ctx.fillStyle = INK;
+        ctx.font = "700 20px PingFang SC, Noto Sans SC, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(cell.value, cx, y + rowH / 2);
+      } else {
         const sName = seriesList[i - 1];
         const si = Math.max(0, state.series.indexOf(sName));
-        color = COLORS[si % COLORS.length];
+        const color = COLORS[si % COLORS.length];
+        ctx.fillStyle = color;
+        ctx.font = "600 20px PingFang SC, Noto Sans SC, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(cell.value, cx, y + rowH / 2 - 11);
+        // 较上期增长
+        let gColor = GROW_FLAT;
+        if (cell.growthCls === "up") gColor = GROW_UP;
+        else if (cell.growthCls === "down") gColor = GROW_DOWN;
+        ctx.fillStyle = gColor;
+        ctx.font = "600 14px PingFang SC, Noto Sans SC, sans-serif";
+        ctx.fillText(cell.growthText || "—", cx, y + rowH / 2 + 14);
       }
-      ctx.fillStyle = color;
-      ctx.font = (i === 0 ? "700 " : "600 ") + "20px PingFang SC, Noto Sans SC, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(cell, x + colW / 2, y + rowH / 2);
     });
     ctx.strokeStyle = LINE;
     ctx.lineWidth = 1;
