@@ -661,11 +661,12 @@
     .side-check {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
       border: 1.5px solid var(--card-border);
       border-radius: 14px;
-      background: var(--chip-bg);
+      background: var(--input-bg);
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
@@ -673,26 +674,90 @@
       user-select: none;
       -webkit-user-select: none;
       margin-bottom: 8px;
-      transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+      transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
     }
-    .side-check:hover {
-      border-color: color-mix(in srgb, var(--pink) 40%, var(--card-border));
+    .side-check-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .side-check-text strong {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .side-check-text small {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    /* 自定义开关：关=灰，开=薄荷绿，对比更强 */
+    .side-check input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    .side-switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      flex-shrink: 0;
+      border-radius: 999px;
+      background: #c8b6be;
+      border: 1.5px solid #b39eab;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,.12);
+      transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .side-switch::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,.18);
+      transition: transform .2s cubic-bezier(.22, .9, .3, 1);
     }
     .side-check:has(input:checked) {
-      border-color: color-mix(in srgb, var(--pink) 55%, var(--card-border));
-      background: color-mix(in srgb, var(--pink-soft) 50%, var(--chip-bg));
-      box-shadow: 0 0 0 2px var(--pink-soft);
+      border-color: var(--mint);
+      background: var(--mint-soft);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--mint) 28%, transparent);
     }
-    .side-check:active {
-      transform: scale(.99);
+    .side-check:has(input:checked) .side-switch {
+      background: var(--mint);
+      border-color: color-mix(in srgb, var(--mint) 70%, #2d5a40);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
     }
-    .side-check input {
-      width: 18px;
-      height: 18px;
-      margin: 0;
-      accent-color: var(--pink);
-      flex-shrink: 0;
-      cursor: pointer;
+    .side-check:has(input:checked) .side-switch::after {
+      transform: translateX(20px);
+    }
+    .side-check:has(input:checked) .side-check-text small {
+      color: color-mix(in srgb, var(--mint) 75%, var(--text));
+    }
+    .side-check:not(:has(input:checked)) .side-check-text small {
+      color: var(--muted);
+    }
+    .side-check:active .side-switch::after {
+      width: 24px;
+    }
+    .side-check:focus-within {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--pink-soft);
+    }
+    :root[data-theme="dark"] .side-switch {
+      background: #4a3d48;
+      border-color: #5c4c58;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .side-switch {
+        background: #4a3d48;
+        border-color: #5c4c58;
+      }
     }
     body.side-open { overflow: hidden; }
   </style>
@@ -804,7 +869,11 @@
       <h3>导出</h3>
       <label class="side-check" for="exportChartCheck">
         <input type="checkbox" id="exportChartCheck" checked />
-        <span>同时导出折线图</span>
+        <span class="side-check-text">
+          <strong>同时导出折线图</strong>
+          <small class="side-check-state" id="exportChartStateLabel">已开启</small>
+        </span>
+        <span class="side-switch" aria-hidden="true"></span>
       </label>
       <div class="side-actions">
         <button type="button" class="btn" id="exportImgBtn">📷 导出图片</button>
@@ -1824,6 +1893,18 @@ document.getElementById("sideMask").onclick = closeSideDrawer;
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeSideDrawer();
 });
+
+// 导出折线图开关文案同步
+(function bindExportChartToggle() {
+  const cb = document.getElementById("exportChartCheck");
+  const lab = document.getElementById("exportChartStateLabel");
+  if (!cb || !lab) return;
+  const sync = () => {
+    lab.textContent = cb.checked ? "已开启 · 含趋势图" : "已关闭 · 仅数据表";
+  };
+  cb.addEventListener("change", sync);
+  sync();
+})();
 
 // 无内置示例数据：首次打开保持空白
 const hadData = load();
