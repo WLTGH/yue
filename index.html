@@ -760,6 +760,118 @@
       }
     }
     body.side-open { overflow: hidden; }
+
+    /* ---- 配置页切换条 ---- */
+    .config-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 6px 18px var(--shadow-color);
+    }
+    .config-bar-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .config-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+    .config-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--chip-bg);
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+      max-width: 160px;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease, color .15s ease;
+    }
+    .config-tab span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .config-tab:hover {
+      border-color: color-mix(in srgb, var(--pink) 40%, var(--card-border));
+    }
+    .config-tab.active {
+      border-color: color-mix(in srgb, var(--pink) 55%, var(--card-border));
+      background: color-mix(in srgb, var(--pink-soft) 55%, var(--chip-bg));
+      box-shadow: 0 0 0 2px var(--pink-soft);
+      color: var(--pink-deep);
+    }
+    .config-tab:focus-visible {
+      box-shadow: 0 0 0 3px var(--pink-soft);
+    }
+    .config-bar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .config-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .config-list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      background: var(--input-bg);
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .config-list-item.active {
+      border-color: color-mix(in srgb, var(--pink) 50%, var(--card-border));
+      background: color-mix(in srgb, var(--pink-soft) 40%, var(--input-bg));
+      box-shadow: 0 0 0 2px var(--pink-soft);
+    }
+    .config-list-item .cfg-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      padding: 0;
+      text-align: left;
+      font-family: inherit;
+    }
+    .config-list-item .cfg-name:hover { color: var(--pink-deep); }
+    .config-list-item .cfg-meta {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -769,7 +881,7 @@
 
   <div class="app">
     <h1><span>🌙</span>月矿统计<span>✨</span></h1>
-    <p class="sub">记每周数据</p>
+    <p class="sub">记每周数据 · 配置页请在右上角菜单管理</p>
 
     <div class="card">
       <h2><span class="ico">🎀</span>角色</h2>
@@ -866,6 +978,16 @@
     </div>
 
     <div class="side-section">
+      <h3>配置页</h3>
+      <p class="side-hint" id="activeConfigHint" style="margin:0 0 10px;">当前：—</p>
+      <div class="config-list" id="configList"></div>
+      <div class="side-actions" style="margin-top:10px;">
+        <button type="button" class="btn" id="sideAddConfigBtn">＋ 新建配置页</button>
+      </div>
+      <p class="side-hint">点名称切换配置页；右侧可改名或删除。每个配置页数据独立，至少保留一页。</p>
+    </div>
+
+    <div class="side-section">
       <h3>导出</h3>
       <label class="side-check" for="exportChartCheck">
         <input type="checkbox" id="exportChartCheck" checked />
@@ -877,9 +999,10 @@
       </label>
       <div class="side-actions">
         <button type="button" class="btn" id="exportImgBtn">📷 导出图片</button>
-        <button type="button" class="btn gray" id="exportBtn">📋 复制 JSON</button>
+        <button type="button" class="btn gray" id="exportJsonCopyBtn">📋 复制当前配置 JSON</button>
+        <button type="button" class="btn gray" id="exportJsonDownloadBtn">💾 下载当前配置 JSON</button>
       </div>
-      <p class="side-hint">导出图片会按勾选的角色/日期筛选；未勾选则导出全部。可取消上方勾选，只导出数据表。</p>
+      <p class="side-hint">导出图片会按勾选的角色/日期筛选；未勾选则导出全部。可取消上方勾选，只导出数据表。JSON 仅导出当前配置页；复制过长时自动分段（每段≤130字）。</p>
     </div>
 
     <div class="side-section">
@@ -887,7 +1010,7 @@
       <div class="side-actions">
         <button type="button" class="btn gray" id="importBtn">📥 粘贴导入</button>
       </div>
-      <p class="side-hint">从剪贴板读取 JSON；不支持时会弹出输入框。</p>
+      <p class="side-hint">从剪贴板读取 JSON；不支持时会弹出输入框。若为完整多配置备份则覆盖全部配置页；若为单配置数据则写入当前配置页。</p>
     </div>
 
     <div class="side-section">
@@ -906,11 +1029,16 @@
 
 <script>
 const COLORS = ["#c98a9c", "#a79bc4", "#8fb3a0", "#d9a66c", "#8aa3c2", "#b98aa0", "#a68a6a"];
-const storeKey = "moon-ore-stats-v3";
+const storeKey = "moon-ore-stats-v4";
 // 兼容历史上用过的键，打开时自动迁移，避免「数据不见了」
-const legacyStoreKeys = ["moon-ore-stats-v2", "moon-ore-stats", "moon-ore-stats-v1", ""];
+const legacyStoreKeys = ["moon-ore-stats-v3", "moon-ore-stats-v2", "moon-ore-stats", "moon-ore-stats-v1", ""];
 
+/** 当前工作数据（始终指向 active 配置页） */
 const state = { series: [], dates: [], values: {} };
+/** 全部配置页 */
+let configs = [];
+let activeConfigId = null;
+
 const selectedSeries = new Set();
 const selectedDates = new Set();
 const PAGE_SIZE = 10;
@@ -929,6 +1057,20 @@ function todayISO() {
   return new Date(d - tz).toISOString().slice(0, 10);
 }
 
+function genId() {
+  return "cfg_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+}
+
+function makeEmptyConfig(name) {
+  return {
+    id: genId(),
+    name: name || "默认配置",
+    series: [],
+    dates: [],
+    values: {}
+  };
+}
+
 function canUseLocalStorage() {
   try {
     const k = "__moon_ore_probe__";
@@ -940,51 +1082,130 @@ function canUseLocalStorage() {
   }
 }
 
-function parseStorePayload(raw) {
+/** 解析存储：支持 v4 多配置与旧版单配置 */
+function parseLegacyPayload(raw) {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
+    if (Array.isArray(parsed.configs) && parsed.configs.length) {
+      return { type: "v4", data: parsed };
+    }
     const series = Array.isArray(parsed.series) ? parsed.series : [];
     const dates = Array.isArray(parsed.dates) ? parsed.dates : [];
     const values = parsed.values && typeof parsed.values === "object" ? parsed.values : {};
-    if (!series.length && !dates.length) return null;
-    return { series, dates, values };
+    if (!series.length && !dates.length && !parsed.configs) return null;
+    return { type: "legacy", series, dates, values };
   } catch {
     return null;
   }
+}
+
+function syncStateFromActive() {
+  const cfg = configs.find(c => c.id === activeConfigId) || configs[0];
+  if (!cfg) {
+    state.series = [];
+    state.dates = [];
+    state.values = {};
+    return;
+  }
+  activeConfigId = cfg.id;
+  state.series = Array.isArray(cfg.series) ? cfg.series.slice() : [];
+  state.dates = Array.isArray(cfg.dates) ? cfg.dates.slice() : [];
+  state.values = cfg.values && typeof cfg.values === "object"
+    ? JSON.parse(JSON.stringify(cfg.values))
+    : {};
+}
+
+/** 把当前 state 写回 active 配置页对象 */
+function syncActiveFromState() {
+  const cfg = configs.find(c => c.id === activeConfigId);
+  if (!cfg) return;
+  cfg.series = state.series.slice();
+  cfg.dates = state.dates.slice();
+  cfg.values = JSON.parse(JSON.stringify(state.values));
 }
 
 function applyStatePayload(payload) {
   state.series = payload.series.slice();
   state.dates = payload.dates.slice();
   state.values = JSON.parse(JSON.stringify(payload.values));
+  syncActiveFromState();
 }
 
 function load() {
   storageOk = canUseLocalStorage();
-  if (!storageOk) return false;
-  try {
-    // 1) 当前键
-    let payload = parseStorePayload(localStorage.getItem(storeKey));
-    // 2) 旧键迁移
-    if (!payload) {
-      for (const key of legacyStoreKeys) {
-        payload = parseStorePayload(localStorage.getItem(key));
-        if (payload) {
-          // 写回新键，并尽量清掉旧键（空字符串键也尝试清除）
-          try { localStorage.setItem(storeKey, JSON.stringify(payload)); } catch (_) {}
-          try { if (key !== storeKey) localStorage.removeItem(key); } catch (_) {}
-          break;
-        }
-      }
-    }
-    if (!payload) return false;
-    applyStatePayload(payload);
-    return true;
-  } catch {
+  if (!storageOk) {
+    configs = [makeEmptyConfig("默认配置")];
+    activeConfigId = configs[0].id;
+    syncStateFromActive();
     return false;
   }
+  try {
+    let parsed = parseLegacyPayload(localStorage.getItem(storeKey));
+    if (!parsed) {
+      for (const key of legacyStoreKeys) {
+        parsed = parseLegacyPayload(localStorage.getItem(key));
+        if (parsed) break;
+      }
+    }
+    if (!parsed) {
+      configs = [makeEmptyConfig("默认配置")];
+      activeConfigId = configs[0].id;
+      syncStateFromActive();
+      return false;
+    }
+    if (parsed.type === "v4") {
+      const data = parsed.data;
+      configs = (data.configs || []).map(c => ({
+        id: c.id || genId(),
+        name: (c.name && String(c.name).trim()) || "未命名",
+        series: Array.isArray(c.series) ? c.series : [],
+        dates: Array.isArray(c.dates) ? c.dates : [],
+        values: c.values && typeof c.values === "object" ? c.values : {}
+      }));
+      if (!configs.length) configs = [makeEmptyConfig("默认配置")];
+      activeConfigId = data.activeConfigId;
+      if (!configs.some(c => c.id === activeConfigId)) {
+        activeConfigId = configs[0].id;
+      }
+    } else {
+      const cfg = makeEmptyConfig("默认配置");
+      cfg.series = parsed.series;
+      cfg.dates = parsed.dates;
+      cfg.values = parsed.values;
+      configs = [cfg];
+      activeConfigId = cfg.id;
+    }
+    syncStateFromActive();
+    try {
+      save();
+      for (const key of legacyStoreKeys) {
+        try { if (key !== storeKey) localStorage.removeItem(key); } catch (_) {}
+      }
+    } catch (_) {}
+    return true;
+  } catch {
+    configs = [makeEmptyConfig("默认配置")];
+    activeConfigId = configs[0].id;
+    syncStateFromActive();
+    return false;
+  }
+}
+
+function buildStorePayload() {
+  syncActiveFromState();
+  return {
+    version: 4,
+    activeConfigId,
+    configs: configs.map(c => ({
+      id: c.id,
+      name: c.name,
+      series: c.series.slice(),
+      dates: c.dates.slice(),
+      values: JSON.parse(JSON.stringify(c.values))
+    }))
+  };
 }
 
 function save() {
@@ -998,9 +1219,8 @@ function save() {
   }
   storageOk = true;
   try {
-    const payload = JSON.stringify(state);
+    const payload = JSON.stringify(buildStorePayload());
     localStorage.setItem(storeKey, payload);
-    // 读回校验，防止静默失败
     const check = localStorage.getItem(storeKey);
     if (check !== payload) throw new Error("storage verify failed");
     return true;
@@ -1012,6 +1232,119 @@ function save() {
     }
     return false;
   }
+}
+
+function getActiveConfig() {
+  return configs.find(c => c.id === activeConfigId) || configs[0] || null;
+}
+
+function switchConfig(id) {
+  if (id === activeConfigId) return;
+  if (!configs.some(c => c.id === id)) return;
+  syncActiveFromState();
+  activeConfigId = id;
+  selectedSeries.clear();
+  selectedDates.clear();
+  tablePage = 0;
+  syncStateFromActive();
+  save();
+  render();
+}
+
+function addConfig(name) {
+  const n = (name || "").trim() || ("配置 " + (configs.length + 1));
+  const cfg = makeEmptyConfig(n);
+  configs.push(cfg);
+  switchConfig(cfg.id);
+}
+
+function renameConfig(id, newName) {
+  const name = (newName || "").trim();
+  if (!name) return alert("名称不能为空");
+  const cfg = configs.find(c => c.id === id);
+  if (!cfg) return;
+  cfg.name = name;
+  save();
+  renderConfigUI();
+}
+
+function deleteConfig(id) {
+  if (configs.length <= 1) {
+    alert("至少保留一个配置页");
+    return;
+  }
+  const cfg = configs.find(c => c.id === id);
+  if (!cfg) return;
+  if (!confirm("确定删除配置页「" + cfg.name + "」？其中的数据将无法恢复。")) return;
+  const wasActive = activeConfigId === id;
+  configs = configs.filter(c => c.id !== id);
+  if (wasActive) {
+    activeConfigId = configs[0].id;
+    selectedSeries.clear();
+    selectedDates.clear();
+    tablePage = 0;
+    syncStateFromActive();
+  }
+  save();
+  render();
+}
+
+function promptRenameConfig(id) {
+  const cfg = configs.find(c => c.id === (id || activeConfigId));
+  if (!cfg) return;
+  const name = window.prompt("配置页名称：", cfg.name);
+  if (name == null) return;
+  renameConfig(cfg.id, name);
+}
+
+function promptAddConfig() {
+  const name = window.prompt("新配置页名称：", "配置 " + (configs.length + 1));
+  if (name == null) return;
+  addConfig(name);
+}
+
+function renderConfigUI() {
+  const list = document.getElementById("configList");
+  const hint = document.getElementById("activeConfigHint");
+  const active = getActiveConfig();
+  if (hint) {
+    hint.textContent = active
+      ? ("当前：「" + active.name + "」（共 " + configs.length + " 页）")
+      : "当前：—";
+  }
+  if (!list) return;
+  list.innerHTML = "";
+  configs.forEach(c => {
+    const row = document.createElement("div");
+    row.className = "config-list-item" + (c.id === activeConfigId ? " active" : "");
+    const nameBtn = document.createElement("button");
+    nameBtn.type = "button";
+    nameBtn.className = "cfg-name";
+    nameBtn.textContent = c.name;
+    nameBtn.title = "切换到此配置页";
+    nameBtn.onclick = () => switchConfig(c.id);
+    const meta = document.createElement("span");
+    meta.className = "cfg-meta";
+    const sc = Array.isArray(c.series) ? c.series.length : 0;
+    const dc = Array.isArray(c.dates) ? c.dates.length : 0;
+    meta.textContent = sc + " 角色 · " + dc + " 日期";
+    const ren = document.createElement("button");
+    ren.type = "button";
+    ren.className = "btn gray small";
+    ren.textContent = "改名";
+    ren.onclick = (e) => { e.stopPropagation(); promptRenameConfig(c.id); };
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "btn red small";
+    del.textContent = "删";
+    del.disabled = configs.length <= 1;
+    del.onclick = (e) => { e.stopPropagation(); deleteConfig(c.id); };
+    row.appendChild(nameBtn);
+    row.appendChild(meta);
+    row.appendChild(ren);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
 }
 
 function ensure(date, series) {
@@ -1470,10 +1803,12 @@ window.addEventListener("resize", () => {
 });
 
 function render() {
+  renderConfigUI();
   renderChips();
   renderDateChips();
   renderTable();
   updateChart();
+  updateStorageStatusHint();
 }
 
 document.getElementById("seriesDrawerBtn").onclick = () => {
@@ -1512,10 +1847,15 @@ document.getElementById("seriesName").addEventListener("keydown", e => {
 });
 document.getElementById("addDateBtn").onclick = () => addDate(document.getElementById("oneDate").value);
 document.getElementById("clearBtn").onclick = () => {
-  if (!confirm("确定清空全部数据？")) return;
+  const cfg = getActiveConfig();
+  const label = cfg ? "「" + cfg.name + "」" : "当前配置页";
+  if (!confirm("确定清空" + label + "的全部数据？（不会删除其他配置页）")) return;
   state.series = [];
   state.dates = [];
   state.values = {};
+  selectedSeries.clear();
+  selectedDates.clear();
+  tablePage = 0;
   save(); render();
 };
 function exportImage(seriesFilter, dateFilter) {
@@ -1823,30 +2163,153 @@ function applyImportedJson(text) {
   try {
     const parsed = JSON.parse(text);
     if (!parsed || typeof parsed !== "object") throw new Error("bad");
+    // 完整多配置备份
+    if (Array.isArray(parsed.configs) && parsed.configs.length) {
+      configs = parsed.configs.map(c => ({
+        id: c.id || genId(),
+        name: (c.name && String(c.name).trim()) || "未命名",
+        series: Array.isArray(c.series) ? c.series : [],
+        dates: Array.isArray(c.dates) ? c.dates : [],
+        values: c.values && typeof c.values === "object" ? c.values : {}
+      }));
+      activeConfigId = parsed.activeConfigId;
+      if (!configs.some(c => c.id === activeConfigId)) {
+        activeConfigId = configs[0].id;
+      }
+      selectedSeries.clear();
+      selectedDates.clear();
+      tablePage = 0;
+      syncStateFromActive();
+      save();
+      render();
+      alert("已导入全部配置页（" + configs.length + " 个）");
+      return;
+    }
+    // 单配置数据 → 写入当前配置页
     state.series = Array.isArray(parsed.series) ? parsed.series : [];
     state.dates = Array.isArray(parsed.dates) ? parsed.dates : [];
     state.values = parsed.values && typeof parsed.values === "object" ? parsed.values : {};
+    if (parsed.name && String(parsed.name).trim()) {
+      const cfg = getActiveConfig();
+      if (cfg) cfg.name = String(parsed.name).trim();
+    }
     selectedSeries.clear();
     selectedDates.clear();
+    tablePage = 0;
     save();
     render();
-    alert("导入成功");
+    alert("已导入到当前配置页");
   } catch {
     alert("JSON 格式不正确");
   }
 }
 
-document.getElementById("exportBtn").onclick = async () => {
-  const text = JSON.stringify(state, null, 2);
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
+/** 仅导出当前配置页；支持复制 / 下载 */
+const JSON_CHUNK_LIMIT = 130;
+
+function getCurrentConfigExportPayload() {
+  syncActiveFromState();
+  const cfg = getActiveConfig();
+  const name = cfg && cfg.name ? cfg.name : "当前配置";
+  return {
+    name: name,
+    series: state.series.slice(),
+    dates: state.dates.slice(),
+    values: JSON.parse(JSON.stringify(state.values))
+  };
+}
+
+function currentConfigJsonFilename() {
+  const cfg = getActiveConfig();
+  const raw = (cfg && cfg.name) ? String(cfg.name) : "当前配置";
+  const safe = raw.replace(/[\\/:*?"<>|]+/g, "_").trim() || "当前配置";
+  return "月矿统计-" + safe + ".json";
+}
+
+function splitTextByLimit(text, limit) {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += limit) {
+    chunks.push(text.slice(i, i + limit));
+  }
+  return chunks.length ? chunks : [""];
+}
+
+function downloadTextFile(text, filename) {
+  const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || "月矿统计.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+async function copyTextSafe(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
       await navigator.clipboard.writeText(text);
-      alert("已复制到剪贴板");
+      return true;
+    } catch (_) {}
+  }
+  return false;
+}
+
+/** 复制当前配置 JSON；超过 130 字则分段复制 */
+async function copyCurrentConfigJson() {
+  const data = getCurrentConfigExportPayload();
+  const payload = JSON.stringify(data);
+
+  if (payload.length <= JSON_CHUNK_LIMIT) {
+    const ok = await copyTextSafe(payload);
+    if (ok) {
+      alert("已复制当前配置 JSON（" + payload.length + " 字）");
       return;
     }
-  } catch (_) {}
-  // 兼容不支持剪贴板 API 的环境
-  window.prompt("复制下面的 JSON：", text);
+    window.prompt("复制下面的 JSON（≤" + JSON_CHUNK_LIMIT + " 字）：", payload);
+    return;
+  }
+
+  const chunks = splitTextByLimit(payload, JSON_CHUNK_LIMIT);
+  const go = confirm(
+    "当前配置 JSON 共 " + payload.length + " 字，将分成 " + chunks.length +
+    " 段复制（每段 ≤" + JSON_CHUNK_LIMIT + " 字）。\n\n确定开始？"
+  );
+  if (!go) return;
+
+  for (let i = 0; i < chunks.length; i++) {
+    const part = chunks[i];
+    const label = "第 " + (i + 1) + "/" + chunks.length + " 段（" + part.length + " 字）";
+    const ok = await copyTextSafe(part);
+    if (ok) {
+      const cont = confirm(
+        label + " 已复制到剪贴板。\n" +
+        (i < chunks.length - 1 ? "点击确定复制下一段。" : "全部段已复制完成。")
+      );
+      if (!cont && i < chunks.length - 1) return;
+    } else {
+      const v = window.prompt(label + " — 请复制：", part);
+      if (v === null) return;
+    }
+  }
+}
+
+/** 下载当前配置为 JSON 文件（完整内容） */
+function downloadCurrentConfigJson() {
+  const data = getCurrentConfigExportPayload();
+  const text = JSON.stringify(data, null, 2);
+  downloadTextFile(text, currentConfigJsonFilename());
+  alert("已下载：「" + (data.name || "当前配置") + "」的 JSON 文件");
+}
+
+document.getElementById("exportJsonCopyBtn").onclick = () => {
+  copyCurrentConfigJson().catch(() => alert("复制失败，可改用「下载当前配置 JSON」"));
+};
+document.getElementById("exportJsonDownloadBtn").onclick = () => {
+  try {
+    downloadCurrentConfigJson();
+  } catch (_) {
+    alert("下载失败");
+  }
 };
 
 document.getElementById("importBtn").onclick = async () => {
@@ -1894,6 +2357,9 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeSideDrawer();
 });
 
+// 配置页操作（侧边抽屉）
+document.getElementById("sideAddConfigBtn").onclick = promptAddConfig;
+
 // 导出折线图开关文案同步
 (function bindExportChartToggle() {
   const cb = document.getElementById("exportChartCheck");
@@ -1918,10 +2384,14 @@ function updateStorageStatusHint() {
     el.style.color = "var(--coral)";
     return;
   }
+  const cfg = getActiveConfig();
   const n = state.series.length + state.dates.length;
+  const pageInfo = configs.length > 1
+    ? "（共 " + configs.length + " 个配置页，当前「" + (cfg ? cfg.name : "") + "」）"
+    : "";
   el.textContent = hadData || n
-    ? "✓ 本地存储可用，数据会自动保存在本机。"
-    : "✓ 本地存储可用。添加数据后会自动保存。";
+    ? "✓ 本地存储可用，数据会自动保存在本机。" + pageInfo
+    : "✓ 本地存储可用。添加数据后会自动保存。" + pageInfo;
   el.style.color = "var(--mint)";
 }
 updateStorageStatusHint();
@@ -1932,14 +2402,35 @@ window.addEventListener("beforeunload", () => { try { save(); } catch (_) {} });
 // 从后台回到前台时重新加载（多标签页同步）
 window.addEventListener("storage", (e) => {
   if (e.key === storeKey && e.newValue) {
-    const payload = parseStorePayload(e.newValue);
-    if (payload) {
-      applyStatePayload(payload);
-      selectedSeries.clear();
-      selectedDates.clear();
-      render();
-      updateStorageStatusHint();
+    const parsed = parseLegacyPayload(e.newValue);
+    if (!parsed) return;
+    if (parsed.type === "v4") {
+      const data = parsed.data;
+      configs = (data.configs || []).map(c => ({
+        id: c.id || genId(),
+        name: (c.name && String(c.name).trim()) || "未命名",
+        series: Array.isArray(c.series) ? c.series : [],
+        dates: Array.isArray(c.dates) ? c.dates : [],
+        values: c.values && typeof c.values === "object" ? c.values : {}
+      }));
+      if (!configs.length) configs = [makeEmptyConfig("默认配置")];
+      activeConfigId = data.activeConfigId;
+      if (!configs.some(c => c.id === activeConfigId)) {
+        activeConfigId = configs[0].id;
+      }
+    } else {
+      const cfg = makeEmptyConfig("默认配置");
+      cfg.series = parsed.series;
+      cfg.dates = parsed.dates;
+      cfg.values = parsed.values;
+      configs = [cfg];
+      activeConfigId = cfg.id;
     }
+    selectedSeries.clear();
+    selectedDates.clear();
+    tablePage = 0;
+    syncStateFromActive();
+    render();
   }
 });
 </script>
