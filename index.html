@@ -308,32 +308,42 @@
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .chip {
       display: flex;
       align-items: center;
-      gap: 7px;
-      border: 1.5px solid var(--card-border);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 13px;
-      font-weight: 600;
-      background: var(--chip-bg);
+      gap: 8px;
+      border: 2px solid var(--card-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--input-bg);
       color: var(--text);
-      transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 0 2px 8px var(--shadow-color);
+      transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease, transform .12s ease;
+    }
+    .chip:hover {
+      border-color: color-mix(in srgb, var(--pink) 45%, var(--card-border));
+      transform: translateY(-1px);
     }
     .chip:has(input:checked) {
-      border-color: color-mix(in srgb, var(--pink) 55%, var(--card-border));
-      background: color-mix(in srgb, var(--pink-soft) 55%, var(--chip-bg));
-      box-shadow: 0 0 0 2px var(--pink-soft);
+      border-color: var(--pink);
+      background: color-mix(in srgb, var(--pink-soft) 70%, var(--input-bg));
+      box-shadow: 0 0 0 3px var(--pink-soft), 0 4px 12px var(--shadow-color);
+      color: var(--pink-deep);
     }
     .chip input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
+      width: 20px;
+      height: 20px;
       margin: 0;
       accent-color: var(--pink);
       cursor: pointer;
+      flex-shrink: 0;
     }
     .drawer-actions {
       display: flex;
@@ -342,8 +352,8 @@
       margin-bottom: 8px;
     }
     .dot {
-      width: 11px;
-      height: 11px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       flex-shrink: 0;
       box-shadow: 0 0 0 2px #fff, 0 0 6px var(--shadow-color);
@@ -354,39 +364,67 @@
     }
 
     .drawer {
-      border: 1.5px solid var(--card-border);
-      border-radius: 14px;
-      margin-top: 8px;
+      border: 2px solid color-mix(in srgb, var(--pink) 35%, var(--card-border));
+      border-radius: 16px;
+      margin-top: 12px;
       overflow: hidden;
       background: var(--chip-bg);
+      box-shadow: 0 4px 16px var(--shadow-color);
     }
     .drawer-head {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 11px 14px;
+      gap: 10px;
+      padding: 14px 16px;
       border: 0;
-      background: var(--table-head);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--pink-soft) 55%, var(--table-head)), var(--table-head));
       color: var(--text);
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 800;
       text-align: left;
       outline: none;
       user-select: none;
       transition: filter .15s ease, background .15s ease;
     }
-    .drawer-head:hover { filter: brightness(1.03); }
+    .drawer-head:hover { filter: brightness(1.04); }
     .drawer-head:active { filter: brightness(.97); }
     .drawer-head:focus-visible {
       box-shadow: inset 0 0 0 2px var(--pink);
     }
+    .drawer-head-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+    .drawer-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: var(--pink-deep);
+      color: #fff9fa;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .drawer-badge.sel {
+      background: var(--mint);
+      color: #1e3328;
+    }
     .drawer-head .arrow {
       transition: transform .2s ease;
-      color: var(--pink);
-      font-size: 12px;
+      color: var(--pink-deep);
+      font-size: 16px;
+      font-weight: 800;
+      flex-shrink: 0;
     }
     .drawer.open .drawer-head .arrow { transform: rotate(180deg); }
     .drawer-body {
@@ -398,8 +436,19 @@
     .drawer.open .drawer-body { grid-template-rows: 1fr; }
     .drawer-body-inner { overflow: hidden; min-height: 0; }
     .drawer-body-inner > .chips {
-      padding: 10px 12px 12px;
+      padding: 12px 14px 14px;
       border-top: 1px solid var(--card-border);
+    }
+    .select-hint {
+      margin: 0 0 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--pink-soft) 50%, transparent);
+      border: 1px dashed color-mix(in srgb, var(--pink) 40%, var(--card-border));
+      color: var(--pink-deep);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.4;
     }
 
     .table-wrap {
@@ -892,14 +941,19 @@
         </div>
         <button class="btn" id="addSeriesBtn">添加</button>
       </div>
-      <div class="drawer" id="seriesDrawer">
+      <div class="drawer open" id="seriesDrawer">
         <button type="button" class="drawer-head" id="seriesDrawerBtn">
-          <span id="seriesDrawerTitle">角色列表（0）</span>
+          <span class="drawer-head-left">
+            <span>🎀 选择角色</span>
+            <span class="drawer-badge" id="seriesCountBadge">0</span>
+            <span class="drawer-badge sel" id="seriesSelBadge" hidden>已选 0</span>
+          </span>
           <span class="arrow">▾</span>
         </button>
         <div class="drawer-body">
           <div class="drawer-body-inner">
-            <div style="padding:10px 12px 0;">
+            <div style="padding:12px 14px 0;">
+              <p class="select-hint">点选下方卡片勾选角色；勾选后导出图片/数据可只包含这些角色。</p>
               <div class="drawer-actions">
                 <button type="button" class="btn gray small" id="selectAllSeriesBtn">全选</button>
                 <button type="button" class="btn gray small" id="clearSeriesSelBtn">清空勾选</button>
@@ -921,19 +975,23 @@
         </div>
         <button class="btn green" id="addDateBtn">添加日期</button>
       </div>
-      <div class="drawer" id="dateDrawer">
+      <div class="drawer open" id="dateDrawer">
         <button type="button" class="drawer-head" id="dateDrawerBtn">
-          <span id="dateDrawerTitle">日期列表（0）</span>
+          <span class="drawer-head-left">
+            <span>🗓️ 选择日期</span>
+            <span class="drawer-badge" id="dateCountBadge">0</span>
+            <span class="drawer-badge sel" id="dateSelBadge" hidden>已选 0</span>
+          </span>
           <span class="arrow">▾</span>
         </button>
         <div class="drawer-body">
           <div class="drawer-body-inner">
-            <div style="padding:10px 12px 0;">
+            <div style="padding:12px 14px 0;">
+              <p class="select-hint">点选下方卡片勾选日期；勾选后导出只含这些日期，不勾选则导出全部。</p>
               <div class="drawer-actions">
                 <button type="button" class="btn gray small" id="selectAllDatesBtn">全选</button>
                 <button type="button" class="btn gray small" id="clearDatesSelBtn">清空勾选</button>
               </div>
-              <p class="hint" style="margin:0 0 6px;">勾选后，导出会只包含这些日期；不勾选则导出全部日期。</p>
             </div>
             <div class="chips" id="dateChips"></div>
           </div>
@@ -1408,12 +1466,21 @@ function getExportSeries(seriesFilter) {
 
 function renderDateChips() {
   const box = document.getElementById("dateChips");
-  const title = document.getElementById("dateDrawerTitle");
+  const countBadge = document.getElementById("dateCountBadge");
+  const selBadge = document.getElementById("dateSelBadge");
   box.innerHTML = "";
   const selCount = state.dates.filter(d => selectedDates.has(d)).length;
-  title.textContent = "日期列表（" + state.dates.length + "）" + (selCount ? " · 已勾选 " + selCount : "");
+  if (countBadge) countBadge.textContent = String(state.dates.length);
+  if (selBadge) {
+    if (selCount > 0) {
+      selBadge.hidden = false;
+      selBadge.textContent = "已选 " + selCount;
+    } else {
+      selBadge.hidden = true;
+    }
+  }
   if (!state.dates.length) {
-    box.innerHTML = '<span class="hint">还没有日期</span>';
+    box.innerHTML = '<span class="hint">还没有日期，请先在上方添加</span>';
     return;
   }
   state.dates.forEach(date => {
@@ -1422,19 +1489,31 @@ function renderDateChips() {
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = selectedDates.has(date);
-    cb.onchange = () => {
+    cb.setAttribute("aria-label", "勾选日期 " + fmtMD(date));
+    const toggle = () => {
       if (cb.checked) selectedDates.add(date);
       else selectedDates.delete(date);
       renderDateChips();
+    };
+    cb.onchange = toggle;
+    el.onclick = (e) => {
+      if (e.target === cb || e.target.closest("button")) return;
+      cb.checked = !cb.checked;
+      toggle();
     };
     el.appendChild(cb);
     const label = document.createElement("span");
     label.textContent = fmtMD(date);
     el.appendChild(label);
     const btn = document.createElement("button");
+    btn.type = "button";
     btn.className = "btn red small";
     btn.textContent = "删";
-    btn.onclick = () => removeDate(date);
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeDate(date);
+    };
     el.appendChild(btn);
     box.appendChild(el);
   });
@@ -1556,12 +1635,21 @@ function getGrowth(date, series, dateList) {
 
 function renderChips() {
   const box = document.getElementById("seriesChips");
-  const title = document.getElementById("seriesDrawerTitle");
+  const countBadge = document.getElementById("seriesCountBadge");
+  const selBadge = document.getElementById("seriesSelBadge");
   box.innerHTML = "";
   const selCount = state.series.filter(s => selectedSeries.has(s)).length;
-  title.textContent = "角色列表（" + state.series.length + "）" + (selCount ? " · 已勾选 " + selCount : "");
+  if (countBadge) countBadge.textContent = String(state.series.length);
+  if (selBadge) {
+    if (selCount > 0) {
+      selBadge.hidden = false;
+      selBadge.textContent = "已选 " + selCount;
+    } else {
+      selBadge.hidden = true;
+    }
+  }
   if (!state.series.length) {
-    box.innerHTML = '<span class="hint">还没有角色</span>';
+    box.innerHTML = '<span class="hint">还没有角色，请先在上方添加</span>';
     return;
   }
   state.series.forEach((name, i) => {
@@ -1571,10 +1659,17 @@ function renderChips() {
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = selectedSeries.has(name);
-    cb.onchange = () => {
+    cb.setAttribute("aria-label", "勾选角色 " + name);
+    const toggle = () => {
       if (cb.checked) selectedSeries.add(name);
       else selectedSeries.delete(name);
       renderChips();
+    };
+    cb.onchange = toggle;
+    el.onclick = (e) => {
+      if (e.target === cb || e.target.closest("button")) return;
+      cb.checked = !cb.checked;
+      toggle();
     };
     el.appendChild(cb);
     const dot = document.createElement("span");
