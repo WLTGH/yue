@@ -926,297 +926,211 @@
     }
   
     /* =====================================================
-       手账纸张主题（Paper journal）
-       牛皮纸桌面 + 纸片卡片 + 和纸胶带 + 荧光笔选中 + 墨水印章按钮
+       手账本（Journal v2）：点阵纸页面 + 手绘描边 + 和纸胶带 + 荧光笔 + 印章
        ===================================================== */
     :root {
-      --bg-1: #d8c7a8; --desk-text: #4a3b32;
-      --paper: #fffcf4; --paper-2: #fffaf0;
-      --card-bg: #fffcf4; --card-border: #e0d2b5;
-      --input-bg: #fffaf0; --chip-bg: #fffaf0;
-      --table-head: #f3e6c9; --table-row-alt: rgba(165,138,106,.07);
-      --shadow-color: rgba(80,60,30,.3);
-      --text: #4a3b32; --muted: #7d6a52; --grid-line: rgba(120,95,60,.2);
-      --ink: #8a3d57; --on-ink: #fffcf4; --ink-line: #a58a6a; --ink-soft: #7a2a47;
-      --hl: #ffe3ec; --note-bg: #fff3b8; --note-fg: #5a4a1a;
-      --sticker: #fff1a8; --danger: #a03c30;
-      --mint-ink: #4d7a62; --mint-paper: #d6ebdd; --mint-fg: #1f4a35;
-      --tape-1: rgba(238,140,172,.74); --tape-2: rgba(143,200,170,.76); --tape-3: rgba(246,206,100,.78); --tape-4: rgba(176,160,226,.72);
-      --focus-gap: #fffcf4;
-      --serif: "Noto Serif SC","Source Han Serif SC","Songti SC","STSong",Georgia,"SimSun",serif;
-      --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.18 0 0 0 0 0.1 0 0 0 .16 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      --bg-1:#fbf3e4; --paper:#fffdf6; --ink:#4a3828; --hard:#4a3828; --pencil:#a58a6a;
+      --text:#4a3828; --muted:#7a6650; --desk-text:#4a3828;
+      --card-bg:#fffdf6; --card-border:#cdb99a; --input-bg:#fffdf6; --chip-bg:#fffdf6;
+      --table-head:#ffe9a8; --table-row-alt:rgba(255,233,168,.28);
+      --shadow-color:rgba(74,56,40,.25); --grid-line:rgba(74,56,40,.16);
+      --j-pink:#ff9fbc; --on-pink:#4a1a2a; --j-yellow:#ffe36e; --j-yellow-soft:#ffe9a8; --on-mark:#4a3828;
+      --j-mint:#a8e0c0; --mint-fg:#1f4a35; --j-red:#c23a4e; --j-green:#2f7a52;
+      --note-bg:#fff3b8; --note-fg:#5a4a1a; --field:rgba(255,227,110,.2); --field-focus:rgba(255,227,110,.4);
+      --pshadow:3px 3px 0 rgba(74,56,40,.2); --dots:rgba(120,95,70,.3);
+      --tape-a:rgba(255,159,188,.8); --tape-b:rgba(143,210,170,.82);
+      --hand:"Kaiti SC","STKaiti","KaiTi","楷体","Noto Serif SC",serif;
+      --wob:14px 18px 12px 20px / 18px 12px 20px 14px;
+      --wob-s:10px 14px 10px 12px / 12px 10px 14px 10px;
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg-1: #2b2520; --desk-text: #eadfca;
-        --paper: #3b332c; --paper-2: #453b32;
-        --card-bg: #3b332c; --card-border: #55493d;
-        --input-bg: #453b32; --chip-bg: #453b32;
-        --table-head: #4c4034; --table-row-alt: rgba(255,255,255,.035);
-        --shadow-color: rgba(0,0,0,.45);
-        --text: #f0e6d6; --muted: #b8a890; --grid-line: rgba(240,230,214,.14);
-        --ink: #e8a0b6; --on-ink: #2b1520; --ink-line: #8a7863; --ink-soft: #ffd3e0;
-        --hl: #5a3446; --note-bg: #5a4d28; --note-fg: #f5e8b8;
-        --sticker: #6b5a2a; --danger: #f0a89c;
-        --mint-ink: #5f9a7e; --mint-paper: #2f4a3c; --mint-fg: #cfe8d8;
-        --tape-1: rgba(214,120,150,.6); --tape-2: rgba(110,170,140,.6); --tape-3: rgba(214,170,70,.6); --tape-4: rgba(150,130,210,.6);
-        --focus-gap: #3b332c;
-        --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+        --bg-1:#2a2622; --paper:#38322c; --ink:#f1e6d3; --hard:rgba(0,0,0,.65); --pencil:#8f7f68;
+        --text:#f1e6d3; --muted:#c2b39a; --desk-text:#f1e6d3;
+        --card-bg:#38322c; --card-border:#5a4e40; --input-bg:#38322c; --chip-bg:#38322c;
+        --table-head:#5a4a1e; --table-row-alt:rgba(232,201,79,.07);
+        --shadow-color:rgba(0,0,0,.45); --grid-line:rgba(241,230,211,.16);
+        --j-pink:#f08fb0; --on-pink:#3a1424; --j-yellow:#e8c94f; --j-yellow-soft:#5a4a1e; --on-mark:#2e2610;
+        --j-mint:#3f7a5c; --mint-fg:#e6f6ee; --j-red:#ff8a9a; --j-green:#8fd1b0;
+        --note-bg:#5a4d28; --note-fg:#f5e8b8; --field:rgba(232,201,79,.12); --field-focus:rgba(232,201,79,.26);
+        --pshadow:3px 3px 0 rgba(0,0,0,.4); --dots:rgba(241,230,211,.2);
+        --tape-a:rgba(214,120,150,.7); --tape-b:rgba(110,170,140,.7);
       }
     }
     :root[data-theme="dark"] {
-        --bg-1: #2b2520; --desk-text: #eadfca;
-        --paper: #3b332c; --paper-2: #453b32;
-        --card-bg: #3b332c; --card-border: #55493d;
-        --input-bg: #453b32; --chip-bg: #453b32;
-        --table-head: #4c4034; --table-row-alt: rgba(255,255,255,.035);
-        --shadow-color: rgba(0,0,0,.45);
-        --text: #f0e6d6; --muted: #b8a890; --grid-line: rgba(240,230,214,.14);
-        --ink: #e8a0b6; --on-ink: #2b1520; --ink-line: #8a7863; --ink-soft: #ffd3e0;
-        --hl: #5a3446; --note-bg: #5a4d28; --note-fg: #f5e8b8;
-        --sticker: #6b5a2a; --danger: #f0a89c;
-        --mint-ink: #5f9a7e; --mint-paper: #2f4a3c; --mint-fg: #cfe8d8;
-        --tape-1: rgba(214,120,150,.6); --tape-2: rgba(110,170,140,.6); --tape-3: rgba(214,170,70,.6); --tape-4: rgba(150,130,210,.6);
-        --focus-gap: #3b332c;
-        --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+        --bg-1:#2a2622; --paper:#38322c; --ink:#f1e6d3; --hard:rgba(0,0,0,.65); --pencil:#8f7f68;
+        --text:#f1e6d3; --muted:#c2b39a; --desk-text:#f1e6d3;
+        --card-bg:#38322c; --card-border:#5a4e40; --input-bg:#38322c; --chip-bg:#38322c;
+        --table-head:#5a4a1e; --table-row-alt:rgba(232,201,79,.07);
+        --shadow-color:rgba(0,0,0,.45); --grid-line:rgba(241,230,211,.16);
+        --j-pink:#f08fb0; --on-pink:#3a1424; --j-yellow:#e8c94f; --j-yellow-soft:#5a4a1e; --on-mark:#2e2610;
+        --j-mint:#3f7a5c; --mint-fg:#e6f6ee; --j-red:#ff8a9a; --j-green:#8fd1b0;
+        --note-bg:#5a4d28; --note-fg:#f5e8b8; --field:rgba(232,201,79,.12); --field-focus:rgba(232,201,79,.26);
+        --pshadow:3px 3px 0 rgba(0,0,0,.4); --dots:rgba(241,230,211,.2);
+        --tape-a:rgba(214,120,150,.7); --tape-b:rgba(110,170,140,.7);
       }
 
-    /* ---- 桌面：牛皮纸 ---- */
+    /* 点阵纸 */
     body {
       background-color: var(--bg-1);
-      background-image: var(--grain), repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 2px, transparent 2px 6px);
+      background-image: radial-gradient(circle, var(--dots) 1.2px, transparent 1.7px);
+      background-size: 22px 22px;
       background-attachment: fixed;
     }
     h1 {
       background: none;
       -webkit-background-clip: border-box;
       background-clip: border-box;
-      color: var(--desk-text);
-      font-family: var(--serif);
+      color: var(--ink);
+      font-family: var(--hand);
       font-weight: 700;
+      text-decoration: underline wavy var(--j-pink);
+      text-decoration-thickness: 3px;
+      text-underline-offset: 8px;
     }
-    .sub { color: var(--desk-text); opacity: 1; }
-    .card h2, .side-head h2 { font-family: var(--serif); }
+    .sub { color: var(--muted); opacity: 1; font-family: var(--hand); }
+    .card h2, .side-head h2 { font-family: var(--hand); font-weight: 700; }
 
-    /* ---- 卡片：纸片 + 和纸胶带 ---- */
+    /* 卡片：手绘描边 + 偏移纸影 + 两角和纸胶带 */
     .card, .config-bar {
       position: relative;
-      background: var(--grain), var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      box-shadow: 0 1px 1px rgba(60,40,20,.25), 0 12px 18px -10px var(--shadow-color);
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: var(--wob);
+      box-shadow: 4px 5px 0 var(--shadow-color);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-    .card::before {
+    .card::before, .card::after {
       content: "";
       position: absolute;
-      top: -10px;
-      left: 50%;
-      width: 86px;
-      height: 20px;
-      margin-left: -43px;
-      background: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 5px, transparent 5px 10px), var(--tape-1);
-      transform: rotate(-2deg);
-      clip-path: polygon(0 0,3% 20%,0 40%,3% 60%,0 80%,0 100%,100% 100%,100% 80%,97% 60%,100% 40%,97% 20%,100% 0);
+      top: -12px;
+      width: 74px;
+      height: 22px;
       pointer-events: none;
+      background: repeating-linear-gradient(135deg, rgba(255,255,255,.35) 0 4px, transparent 4px 8px), var(--tape-a);
     }
-    .card:nth-of-type(4n+2)::before { background: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 5px, transparent 5px 10px), var(--tape-2); transform: rotate(2.5deg); left: 38%; }
-    .card:nth-of-type(4n+3)::before { background: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 5px, transparent 5px 10px), var(--tape-3); transform: rotate(-1.5deg); left: 62%; }
-    .card:nth-of-type(4n+4)::before { background: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 5px, transparent 5px 10px), var(--tape-4); transform: rotate(2deg); left: 50%; }
+    .card::before { left: 20px; transform: rotate(-6deg); }
+    .card::after { right: 20px; transform: rotate(5deg); background: repeating-linear-gradient(135deg, rgba(255,255,255,.35) 0 4px, transparent 4px 8px), var(--tape-b); }
+    .card:nth-of-type(even)::before { background: repeating-linear-gradient(135deg, rgba(255,255,255,.35) 0 4px, transparent 4px 8px), var(--tape-b); }
+    .card:nth-of-type(even)::after { background: repeating-linear-gradient(135deg, rgba(255,255,255,.35) 0 4px, transparent 4px 8px), var(--tape-a); }
 
-    /* ---- 输入框：写在纸上的虚线横线 ---- */
+    /* 输入：铅笔横线 + 荧光底 */
     input[type="text"], input[type="number"], input[type="date"] {
       border: 0;
-      border-bottom: 1.5px dotted var(--ink-line);
-      border-radius: 2px;
-      background: rgba(165,138,106,.1);
+      border-bottom: 2px solid var(--pencil);
+      border-radius: 6px 6px 0 0;
+      background: var(--field);
       box-shadow: none;
-    }
-    input[type="text"]:hover, input[type="number"]:hover, input[type="date"]:hover {
-      background: rgba(165,138,106,.16);
-      border-bottom-color: var(--ink-line);
-    }
-    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus {
-      background: color-mix(in srgb, var(--hl) 70%, transparent);
-      border-bottom: 1.5px solid var(--ink);
-      box-shadow: none;
-    }
-
-    /* ---- 按钮：墨水印章 ---- */
-    .btn {
-      border: 1.5px solid var(--ink);
-      border-radius: 4px;
-      background: var(--ink);
-      color: var(--on-ink);
-      text-shadow: none;
-      box-shadow: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-    .btn:hover { filter: none; background: color-mix(in srgb, var(--ink) 86%, #000); box-shadow: none; }
-    .btn:active { transform: translateY(1px); filter: none; box-shadow: none; }
-    .btn:focus-visible { box-shadow: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--ink); }
-    .btn.green { background: var(--mint-paper); color: var(--mint-fg); border-color: var(--mint-ink); }
-    .btn.green:hover { background: color-mix(in srgb, var(--mint-paper) 80%, var(--mint-ink)); }
-    .btn.gray, .btn.red {
-      background: transparent;
       color: var(--ink);
-      border: 1.5px solid var(--ink);
-      box-shadow: none;
     }
-    .btn.red { color: var(--danger); border-color: var(--danger); }
-    .btn.gray:hover, .btn.red:hover { background: color-mix(in srgb, var(--hl) 70%, transparent); border-color: var(--ink); }
-    .btn.red:hover { border-color: var(--danger); }
-    .btn.gray:active, .btn.red:active { background: var(--hl); box-shadow: none; }
-    .btn.gray:focus-visible, .btn.red:focus-visible { box-shadow: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--ink); }
-    .pager .btn.active {
-      background: var(--ink);
-      color: var(--on-ink);
-      border: 1.5px solid var(--ink);
+    input[type="text"]:hover, input[type="number"]:hover, input[type="date"]:hover { background: var(--field); border-bottom-color: var(--pencil); }
+    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus {
+      background: var(--field-focus);
+      border-bottom-color: var(--j-red);
       box-shadow: none;
+      outline: 0;
     }
 
-    /* ---- 角色勾选：贴纸 + 荧光笔 ---- */
-    .chip {
-      border: 1.5px dashed var(--ink-line);
-      border-radius: 4px;
-      background: var(--paper-2);
-      box-shadow: none;
-    }
-    .chip:hover { border-color: var(--ink); background: var(--paper-2); }
-    .chip:has(input:checked) {
-      border: 1.5px solid var(--ink);
-      background: var(--hl);
-      color: var(--ink-soft);
-      box-shadow: 0 1px 2px rgba(60,40,20,.2);
-    }
-    .chip input[type="checkbox"] { accent-color: var(--ink); }
-    .dot { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--ink-line); }
-
-    .drawer {
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      background: var(--paper-2);
-      box-shadow: none;
-    }
-    .drawer-head { background: var(--table-head); }
-    .drawer-head:focus-visible { box-shadow: inset 0 0 0 2px var(--ink); }
-    .drawer-body { background: transparent; }
-    .drawer-body-inner > .chips { border-top: 1.5px dotted var(--ink-line); }
-    .drawer-badge {
-      background: var(--sticker);
-      color: var(--note-fg);
-      border-radius: 2px;
-      transform: rotate(2deg);
-      box-shadow: 0 1px 2px rgba(60,40,20,.25);
-    }
-    .drawer-badge.sel { background: var(--mint-paper); color: var(--mint-fg); transform: rotate(-2deg); }
-    .select-hint {
-      background: var(--note-bg);
-      color: var(--note-fg);
-      border: 1px dashed var(--ink-line);
-      border-radius: 2px;
-      box-shadow: 0 2px 4px -2px rgba(60,40,20,.3);
-    }
-
-    /* ---- 表格：账本 ---- */
-    .table-wrap {
-      border: 1px solid var(--card-border);
-      border-radius: 3px;
-      background: var(--paper-2);
-    }
-
-    /* ---- 配置页切换：索引标签 ---- */
-    .config-tab, .config-list-item {
-      border: 1.5px dashed var(--ink-line);
-      border-radius: 4px;
-      background: var(--paper-2);
-      color: var(--text);
-      box-shadow: none;
-    }
-    .config-tab:hover { border-color: var(--ink); background: var(--paper-2); }
-    .config-tab.active, .config-list-item.active {
-      border: 1.5px solid var(--ink);
-      background: var(--hl);
-      color: var(--ink-soft);
-      box-shadow: 0 1px 2px rgba(60,40,20,.2);
-    }
-    .config-tab:focus-visible { box-shadow: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--ink); }
-
-    /* ---- 菜单键 = 便利贴；抽屉 = 夹进来的一页纸 ---- */
-    .menu-fab {
-      background: var(--sticker);
-      color: var(--note-fg);
-      border: 1.5px solid var(--ink-line);
+    /* 按钮：印章，按下去会“盖”一下 */
+    .btn {
+      border: 2px solid var(--ink);
+      border-radius: var(--wob-s);
+      background: var(--j-pink);
+      color: var(--on-pink);
+      text-shadow: none;
+      box-shadow: 2px 3px 0 var(--hard);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
-      box-shadow: 0 3px 6px rgba(60,40,20,.35);
     }
-    .menu-fab:hover { border-color: var(--ink); }
+    .btn:hover { filter: none; background: var(--j-pink); transform: translate(-1px, -1px); box-shadow: 3px 4px 0 var(--hard); }
+    .btn:active { filter: none; transform: translate(2px, 3px); box-shadow: 0 0 0 var(--hard); }
+    .btn:focus-visible { outline: 2px dashed var(--j-red); outline-offset: 3px; box-shadow: 2px 3px 0 var(--hard); }
+    .btn.green { background: var(--j-mint); color: var(--mint-fg); }
+    .btn.gray, .btn.red { background: var(--paper); color: var(--ink); border: 2px solid var(--ink); box-shadow: 2px 3px 0 var(--hard); }
+    .btn.red { color: var(--j-red); border-color: var(--j-red); box-shadow: 2px 3px 0 var(--j-red); }
+    .btn.gray:hover, .btn.red:hover { background: var(--field-focus); border-color: var(--ink); transform: translate(-1px, -1px); }
+    .btn.red:hover { border-color: var(--j-red); }
+    .btn.gray:active, .btn.red:active { background: var(--field-focus); transform: translate(2px, 3px); box-shadow: 0 0 0 var(--hard); }
+    .btn:disabled { opacity: .45; transform: none; box-shadow: none; }
+    .pager .btn.active { background: var(--j-yellow); color: var(--on-mark); border: 2px solid var(--ink); box-shadow: 0 0 0 var(--hard); transform: translate(2px, 3px); }
+
+    /* 勾选卡片：贴纸；选中 = 荧光笔涂过 + 微微歪斜 */
+    .chip {
+      border: 1.5px solid var(--ink);
+      border-radius: var(--wob-s);
+      background: var(--paper);
+      box-shadow: var(--pshadow);
+    }
+    .chip:hover { transform: translateY(-1px); background: var(--paper); }
+    .chip:has(input:checked) {
+      background: var(--j-yellow-soft);
+      color: var(--ink);
+      font-weight: 700;
+      transform: rotate(-1.2deg);
+      box-shadow: var(--pshadow);
+    }
+    .chip:has(input:checked):hover { transform: rotate(-1.2deg) translateY(-1px); }
+    .chip input[type="checkbox"] { accent-color: var(--j-red); }
+    .dot { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink); }
+
+    /* 折叠区：沿虚线剪下来的一块 */
+    .drawer { border: 2px dashed var(--pencil); border-radius: 14px; background: var(--paper); box-shadow: none; }
+    .drawer-head { background: var(--table-head); }
+    .drawer-head:focus-visible { outline: 2px dashed var(--j-red); outline-offset: -4px; box-shadow: none; }
+    .drawer-body { background: transparent; }
+    .drawer-body-inner > .chips { border-top: 2px dashed var(--pencil); }
+    /* “已选 N”：盖章 */
+    .drawer-badge { background: transparent; color: var(--j-red); border: 2px solid var(--j-red); border-radius: 8px; transform: rotate(-4deg); font-weight: 700; box-shadow: none; }
+    .drawer-badge.sel { color: var(--j-green); border-color: var(--j-green); transform: rotate(3deg); background: transparent; }
+    .select-hint { background: var(--note-bg); color: var(--note-fg); border: 0; border-radius: 3px; transform: rotate(-.6deg); box-shadow: 2px 3px 0 var(--shadow-color); }
+
+    /* 表格：账本格 */
+    .table-wrap { border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); box-shadow: none; }
+
+    /* 配置页切换：索引标签 */
+    .config-tab, .config-list-item { border: 2px solid var(--ink); border-radius: var(--wob-s); background: var(--paper); color: var(--ink); box-shadow: 2px 3px 0 var(--hard); }
+    .config-tab:hover { background: var(--paper); transform: translate(-1px, -1px); }
+    .config-tab.active, .config-list-item.active { background: var(--j-yellow); color: var(--on-mark); box-shadow: 0 0 0 var(--hard); transform: translate(2px, 3px); }
+    .config-tab:focus-visible { outline: 2px dashed var(--j-red); outline-offset: 3px; }
+
+    /* 菜单键 = 圆形贴纸；抽屉 = 带横线的活页纸 */
+    .menu-fab { background: var(--j-yellow); color: var(--on-mark); border: 2px solid var(--ink); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 2px 3px 0 var(--hard); }
+    .menu-fab:hover { transform: translate(-1px, -1px) rotate(-4deg); }
+    .menu-fab:active { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--hard); }
     .side-mask { background: rgba(50,35,20,.42); }
     .side-drawer {
-      background: var(--grain), var(--paper);
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(transparent 0 27px, rgba(106,160,200,.2) 27px 28px);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
-      border-left: 2px dashed var(--ink-line);
+      border: 0;
+      border-left: 2px solid var(--ink);
       border-radius: 0;
-      box-shadow: -12px 0 26px -8px rgba(40,25,10,.4);
+      box-shadow: -6px 0 0 var(--shadow-color), -18px 0 30px rgba(0,0,0,.2);
     }
-    .side-close {
-      border: 1.5px dashed var(--ink-line);
-      border-radius: 4px;
-      background: var(--paper-2);
-      box-shadow: none;
-    }
-    .side-close:hover { border-color: var(--ink); background: var(--hl); }
-    .side-check {
-      border: 1.5px dashed var(--ink-line);
-      border-radius: 4px;
-      background: var(--paper-2);
-      box-shadow: none;
-    }
-    .side-check:has(input:checked) {
-      border: 1.5px solid var(--mint-ink);
-      background: var(--mint-paper);
-      color: var(--mint-fg);
-      box-shadow: none;
-    }
-    .side-check:focus-within { box-shadow: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--ink); }
-    .side-switch {
-      background: rgba(165,138,106,.3);
-      border: 1.5px solid var(--ink-line);
-      box-shadow: none;
-    }
-    .side-switch::after {
-      background: var(--paper);
-      box-shadow: 0 1px 2px rgba(60,40,20,.4);
-    }
-    .side-check:has(input:checked) .side-switch {
-      background: var(--mint-ink);
-      border-color: var(--mint-ink);
-      box-shadow: none;
-    }
-  
-    /* ---- 页面归属署名 ---- */
+    .side-close { border: 2px solid var(--ink); border-radius: 10px; background: var(--paper); box-shadow: 2px 2px 0 var(--hard); }
+    .side-close:hover { background: var(--field-focus); }
+    .side-check { border: 2px dashed var(--pencil); border-radius: 12px; background: var(--paper); box-shadow: none; }
+    .side-check:has(input:checked) { border: 2px solid var(--ink); background: var(--j-mint); color: var(--mint-fg); box-shadow: 2px 2px 0 var(--hard); }
+    .side-check:focus-within { outline: 2px dashed var(--j-red); outline-offset: 2px; }
+    .side-switch { background: var(--paper); border: 2px solid var(--ink); box-shadow: none; }
+    .side-switch::after { background: var(--pencil); box-shadow: none; }
+    .side-check:has(input:checked) .side-switch { background: var(--paper); border-color: var(--ink); box-shadow: none; }
+    .side-check:has(input:checked) .side-switch::after { background: var(--j-red); }
+
+    /* ---- 页面归属署名：手写体 + 小花 ---- */
     .wlt-credit {
       margin: 4px 0 calc(22px + env(safe-area-inset-bottom, 0px));
       text-align: center;
-      font-family: var(--serif);
-      font-size: 14px;
+      font-family: var(--hand);
+      font-size: 16px;
       font-weight: 700;
       letter-spacing: 2px;
-      color: var(--desk-text);
+      color: var(--muted);
       user-select: text;
     }
-    .wlt-credit::before, .wlt-credit::after {
-      content: "";
-      display: inline-block;
-      width: 28px;
-      border-top: 1.5px dotted var(--ink-line);
-      vertical-align: middle;
-      margin: 0 10px;
-    }
+    .wlt-credit::before, .wlt-credit::after { content: "✿"; color: var(--j-pink); margin: 0 10px; }
   </style>
 </head>
 <body>
@@ -2294,75 +2208,32 @@ function exportImage(seriesFilter, dateFilter) {
   });
 
   // 配色：与页面主题保持一致的低饱和莫兰迪少女色
-  const INK = "#4a3b32";
-  const MUTED = "#7d6a52";
-  const LINE = "#d6c6a6";
-  const HEAD_BG_1 = "#f3e6c9";
-  const HEAD_BG_2 = "#efdfba";
-  const ROW_ALT = "rgba(165,138,106,.09)";
-  const CARD_BG_1 = "#fffcf4";
-  const CARD_BG_2 = "#fbf6e8";
-  const PAGE_BG_1 = "#d8c7a8";
-  const PAGE_BG_2 = "#cdbb98";
-  const PANEL_BG = "#fffaf0";
-  const ACCENT_1 = "#8a3d57";
-  const ACCENT_2 = "#a58a6a";
-  const GROW_UP = "#3f7a5a";
-  const GROW_DOWN = "#b0483a";
-  const GROW_FLAT = "#7d6a52";
+  const INK = "#4a3828";
+  const MUTED = "#7a6650";
+  const LINE = "#cdb99a";
+  const HEAD_BG_1 = "#ffe9a8";
+  const HEAD_BG_2 = "#ffe9a8";
+  const ROW_ALT = "rgba(255,233,168,.3)";
+  const CARD_BG_1 = "#fffdf6";
+  const CARD_BG_2 = "#fffdf6";
+  const PAGE_BG_1 = "#fbf3e4";
+  const PAGE_BG_2 = "#fbf3e4";
+  const PANEL_BG = "#fffdf6";
+  const ACCENT_1 = "#c23a4e";
+  const ACCENT_2 = "#ff9fbc";
+  const GROW_UP = "#2f7a52";
+  const GROW_DOWN = "#c23a4e";
+  const GROW_FLAT = "#7a6650";
 
-  const SERIF = "Noto Serif SC, Source Han Serif SC, Songti SC, STSong, SimSun, Georgia, serif";
   const SANS = "PingFang SC, Noto Sans SC, sans-serif";
+  const HAND = "Kaiti SC, STKaiti, KaiTi, 楷体, Noto Serif SC, serif";
 
-  // 纸张颗粒：随机半透明噪点平铺（按设备像素，保持细腻）
-  function grainPattern(c, rgb, alphaMax, px) {
-    const t = document.createElement("canvas");
-    t.width = t.height = 128;
-    const tc = t.getContext("2d");
-    const id = tc.createImageData(128, 128);
-    for (let i = 0; i < id.data.length; i += 4) {
-      id.data[i] = rgb[0]; id.data[i + 1] = rgb[1]; id.data[i + 2] = rgb[2];
-      id.data[i + 3] = Math.random() * alphaMax;
-    }
-    tc.putImageData(id, 0, 0);
-    const pat = c.createPattern(t, "repeat");
-    if (pat && pat.setTransform) pat.setTransform(new DOMMatrix().scale(1 / px));
-    return pat;
-  }
-
-  // 和纸胶带：两端锯齿、斜纹、半透明
-  function drawTape(c, cx, cy, w, h, angle, color) {
-    c.save();
-    c.translate(cx, cy);
-    c.rotate(angle);
-    const teeth = 5, tw = 3, th = h / teeth;
-    c.beginPath();
-    c.moveTo(-w / 2, -h / 2);
-    c.lineTo(w / 2, -h / 2);
-    for (let k = 0; k < teeth; k++) {
-      c.lineTo(w / 2 - (k % 2 === 0 ? tw : 0), -h / 2 + th * (k + 0.5));
-      c.lineTo(w / 2, -h / 2 + th * (k + 1));
-    }
-    c.lineTo(-w / 2, h / 2);
-    for (let k = teeth - 1; k >= 0; k--) {
-      c.lineTo(-w / 2 + (k % 2 === 0 ? tw : 0), -h / 2 + th * (k + 0.5));
-      c.lineTo(-w / 2, -h / 2 + th * k);
-    }
-    c.closePath();
-    c.fillStyle = color;
-    c.fill();
-    c.save();
-    c.clip();
-    c.strokeStyle = "rgba(255,255,255,.32)";
-    c.lineWidth = 5;
-    for (let x = -w; x < w; x += 10) {
-      c.beginPath();
-      c.moveTo(x, h / 2 + 2);
-      c.lineTo(x + h + 4, -h / 2 - 2);
-      c.stroke();
-    }
-    c.restore();
-    c.restore();
+  // 数值文字颜色加深，保证在粉底上读得清
+  function deepen(hex, amt) {
+    const n = parseInt(hex.slice(1), 16);
+    const mix = (c, t) => Math.round(c + (t - c) * amt);
+    const r = mix((n >> 16) & 255, 0x4a), g = mix((n >> 8) & 255, 0x14), b = mix(n & 255, 0x2e);
+    return "rgb(" + r + "," + g + "," + b + ")";
   }
 
   function roundRect(c, x, y, w, h, r) {
@@ -2376,13 +2247,66 @@ function exportImage(seriesFilter, dateFilter) {
     c.closePath();
   }
 
+  // 手绘描边盒子：偏移纸影 + 墨线
+  function inkBox(c, x, y, w, h, r, fill, lw, sh) {
+    roundRect(c, x + sh, y + sh + 1, w, h, r);
+    c.fillStyle = "rgba(74,56,40,.2)";
+    c.fill();
+    roundRect(c, x, y, w, h, r);
+    c.fillStyle = fill;
+    c.fill();
+    c.strokeStyle = INK;
+    c.lineWidth = lw;
+    c.stroke();
+  }
+  // 点阵
+  function dotted(c, x, y, w, h, step, color) {
+    c.fillStyle = color;
+    for (let yy = y + step / 2; yy < y + h; yy += step) {
+      for (let xx = x + step / 2; xx < x + w; xx += step) c.fillRect(xx - 1, yy - 1, 2, 2);
+    }
+  }
+  // 和纸胶带
+  function tape(c, cx, cy, w, h, ang, color) {
+    c.save();
+    c.translate(cx, cy);
+    c.rotate(ang);
+    c.fillStyle = color;
+    c.fillRect(-w / 2, -h / 2, w, h);
+    c.beginPath();
+    c.rect(-w / 2, -h / 2, w, h);
+    c.clip();
+    c.strokeStyle = "rgba(255,255,255,.35)";
+    c.lineWidth = 4;
+    for (let x = -w; x < w; x += 8) {
+      c.beginPath();
+      c.moveTo(x, h / 2 + 2);
+      c.lineTo(x + h + 4, -h / 2 - 2);
+      c.stroke();
+    }
+    c.restore();
+  }
+  // 荧光笔
+  function marker(c, x, y, w, h, color) {
+    c.save();
+    c.fillStyle = color;
+    c.beginPath();
+    c.moveTo(x + 4, y);
+    c.lineTo(x + w, y + 2);
+    c.lineTo(x + w - 5, y + h);
+    c.lineTo(x, y + h - 2);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
+
   // 是否导出折线图（侧栏勾选）
   const includeChart = !!(document.getElementById("exportChartCheck") && document.getElementById("exportChartCheck").checked);
 
   const scale = 3;
   const outerMargin = 30;   // 卡片与画布边缘的留白
   const pad = 44;           // 卡片内容内边距
-  const cardRadius = 4;
+  const cardRadius = 16;
   const titleH = 92;
   const dividerH = includeChart ? 46 : 0;
   const footerH = 40;
@@ -2408,70 +2332,38 @@ function exportImage(seriesFilter, dateFilter) {
   const ctx = canvas.getContext("2d");
   ctx.scale(scale, scale);
 
-  // 页面底色
-  const pageGrad = ctx.createLinearGradient(0, 0, width, height);
-  pageGrad.addColorStop(0, PAGE_BG_1);
-  pageGrad.addColorStop(1, PAGE_BG_2);
-  ctx.fillStyle = pageGrad;
+  // 点阵纸页面
+  ctx.fillStyle = PAGE_BG_1;
   ctx.fillRect(0, 0, width, height);
-  // 牛皮纸：斜纹 + 颗粒
-  ctx.save();
-  ctx.strokeStyle = "rgba(255,255,255,.07)";
-  ctx.lineWidth = 2;
-  for (let x = -height; x < width; x += 8) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x + height, height);
-    ctx.stroke();
-  }
-  ctx.fillStyle = grainPattern(ctx, [64, 46, 26], 40, scale);
-  ctx.fillRect(0, 0, width, height);
-  ctx.restore();
+  dotted(ctx, 0, 0, width, height, 24, "rgba(120,95,70,.28)");
 
-  // 纸片卡片（带投影，把表格与折线图“装”进同一张纸里）
-  ctx.save();
-  ctx.shadowColor = "rgba(60,40,20,.38)";
-  ctx.shadowBlur = 26;
-  ctx.shadowOffsetY = 10;
-  const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
-  cardGrad.addColorStop(0, CARD_BG_1);
-  cardGrad.addColorStop(1, CARD_BG_2);
-  roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
-  ctx.fillStyle = cardGrad;
-  ctx.fill();
-  ctx.restore();
-  ctx.save();
-  roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
-  ctx.clip();
-  ctx.fillStyle = grainPattern(ctx, [90, 66, 36], 22, scale);
-  ctx.fillRect(cardX, cardY, cardW, cardH);
-  ctx.restore();
-  roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
-  ctx.strokeStyle = "#e0d2b5";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  // 顶部和纸胶带
-  drawTape(ctx, width / 2, cardY + 1, 120, 26, -0.035, "rgba(238,140,172,.78)");
+  // 手绘描边的纸片卡片 + 两角和纸胶带
+  inkBox(ctx, cardX, cardY, cardW, cardH, cardRadius, CARD_BG_1, 2.5, 6);
+  tape(ctx, cardX + 90, cardY + 2, 110, 26, -0.22, "rgba(255,159,188,.85)");
+  tape(ctx, cardX + cardW - 90, cardY + 2, 110, 26, 0.22, "rgba(143,210,170,.85)");
 
-  // 标题
+  // 标题：楷体 + 荧光笔底纹
   let cursorY = cardY + pad;
+  const titleText = single ? ("月矿统计 · " + seriesList[0]) : "月矿统计";
+  ctx.font = "700 36px " + HAND;
+  const titleW = ctx.measureText(titleText).width;
+  marker(ctx, width / 2 - titleW / 2 - 12, cursorY + 21, titleW + 24, 14, "rgba(255,227,110,.85)");
   ctx.fillStyle = INK;
-  ctx.font = "700 34px " + SERIF;
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(single ? ("月矿统计 · " + seriesList[0]) : "月矿统计", width / 2, cursorY + 32);
+  ctx.fillText(titleText, width / 2, cursorY + 32);
   ctx.fillStyle = MUTED;
-  ctx.font = "500 17px " + SERIF;
+  ctx.font = "500 17px " + HAND;
   ctx.fillText(single ? seriesList[0] + " · 数据一览" : "数据一览", width / 2, cursorY + 60);
-  // 标题下的手绘波浪线（墨水色）
+  // 标题下的铅笔波浪线
   ctx.save();
-  ctx.strokeStyle = ACCENT_1;
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = ACCENT_2;
+  ctx.lineWidth = 3;
   ctx.lineCap = "round";
   ctx.beginPath();
-  for (let dx = -40; dx <= 40; dx += 2) {
-    const yy = cursorY + 75 + Math.sin(dx / 5) * 2.4;
-    if (dx === -40) ctx.moveTo(width / 2 + dx, yy);
+  for (let dx = -44; dx <= 44; dx += 2) {
+    const yy = cursorY + 76 + Math.sin(dx / 5) * 2.5;
+    if (dx === -44) ctx.moveTo(width / 2 + dx, yy);
     else ctx.lineTo(width / 2 + dx, yy);
   }
   ctx.stroke();
@@ -2480,23 +2372,28 @@ function exportImage(seriesFilter, dateFilter) {
   const tableY = cardY + pad + titleH;
 
   // 表头（圆角面板，不再是一格格独立描边，读起来更整体）
-  roundRect(ctx, contentX, tableY, contentW, rowH, 3);
+  ctx.save();
+  roundRect(ctx, contentX, tableY, contentW, tableH, 6);
+  ctx.clip();
+  ctx.beginPath();
+  ctx.rect(contentX, tableY, contentW, rowH);
   const headGrad = ctx.createLinearGradient(contentX, tableY, contentX, tableY + rowH);
   headGrad.addColorStop(0, HEAD_BG_1);
   headGrad.addColorStop(1, HEAD_BG_2);
   ctx.fillStyle = headGrad;
   ctx.fill();
+  ctx.restore();
   cols.forEach((c, i) => {
     const x = contentX + i * colW;
     ctx.fillStyle = INK;
-    ctx.font = "700 20px " + SERIF;
+    ctx.font = "700 20px " + HAND;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(c, x + colW / 2, tableY + rowH / 2);
   });
 
   // 表格主体：数值 + 较上期增长；只用横向分隔线 + 首列竖线
-  ctx.setLineDash([2, 4]);
+  ctx.setLineDash([6, 4]);
   rows.forEach((r, ri) => {
     const y = tableY + rowH + ri * rowH;
     if (ri % 2 === 1) {
@@ -2508,14 +2405,14 @@ function exportImage(seriesFilter, dateFilter) {
       const cx = x + colW / 2;
       if (i === 0) {
         ctx.fillStyle = INK;
-        ctx.font = "700 20px " + SERIF;
+        ctx.font = "700 20px " + HAND;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(cell.value, cx, y + rowH / 2);
       } else {
         const sName = seriesList[i - 1];
         const si = Math.max(0, state.series.indexOf(sName));
-        const color = COLORS[si % COLORS.length];
+        const color = deepen(COLORS[si % COLORS.length], 0.5);
         ctx.fillStyle = color;
         ctx.font = "600 20px PingFang SC, Noto Sans SC, sans-serif";
         ctx.textAlign = "center";
@@ -2544,14 +2441,19 @@ function exportImage(seriesFilter, dateFilter) {
   ctx.lineTo(contentX + colW, tableY + tableH);
   ctx.stroke();
   ctx.setLineDash([]);
-  roundRect(ctx, contentX, tableY, contentW, tableH, 3);
-  ctx.strokeStyle = LINE;
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(contentX, tableY + rowH);
+  ctx.lineTo(contentX + contentW, tableY + rowH);
+  ctx.stroke();
+  roundRect(ctx, contentX, tableY, contentW, tableH, 6);
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   function finishExport(footerY) {
     ctx.fillStyle = MUTED;
-    ctx.font = "500 14px " + SERIF;
+    ctx.font = "600 16px " + HAND;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("🌙 月矿统计  ·  ©WLT", width / 2, footerY);
@@ -2566,33 +2468,24 @@ function exportImage(seriesFilter, dateFilter) {
 
   // 表格与折线图之间的“连接带”：一条渐变线 + 居中小标签
   const dividerY = tableY + tableH + dividerH / 2;
+  ctx.save();
   ctx.strokeStyle = "#a58a6a";
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([2, 5]);
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.setLineDash([8, 6]);
   ctx.beginPath();
   ctx.moveTo(contentX, dividerY);
   ctx.lineTo(contentX + contentW, dividerY);
   ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.font = "600 15px " + SERIF;
+  ctx.restore();
+  ctx.font = "700 16px " + HAND;
   const dividerLabel = "🌈 趋势图";
-  const labelW = ctx.measureText(dividerLabel).width + 28;
+  const labelW = ctx.measureText(dividerLabel).width + 34;
   ctx.save();
   ctx.translate(width / 2, dividerY);
   ctx.rotate(-0.03);
-  ctx.shadowColor = "rgba(60,40,20,.3)";
-  ctx.shadowBlur = 5;
-  ctx.shadowOffsetY = 2;
-  roundRect(ctx, -labelW / 2, -15, labelW, 30, 3);
-  ctx.fillStyle = "#fff3b8";
-  ctx.fill();
-  ctx.shadowColor = "transparent";
-  ctx.strokeStyle = "#a58a6a";
-  ctx.lineWidth = 1;
-  ctx.setLineDash([3, 3]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = "#5a4a1a";
+  inkBox(ctx, -labelW / 2, -17, labelW, 34, 8, ACCENT_2, 2, 3);
+  ctx.fillStyle = INK;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(dividerLabel, 0, 1);
@@ -2600,11 +2493,17 @@ function exportImage(seriesFilter, dateFilter) {
 
   // 折线图外层面板
   const panelY = tableY + tableH + dividerH;
-  roundRect(ctx, contentX, panelY, contentW, chartH, 4);
+  roundRect(ctx, contentX, panelY, contentW, chartH, 6);
   ctx.fillStyle = PANEL_BG;
   ctx.fill();
-  ctx.strokeStyle = LINE;
-  ctx.lineWidth = 1.5;
+  ctx.save();
+  roundRect(ctx, contentX, panelY, contentW, chartH, 6);
+  ctx.clip();
+  dotted(ctx, contentX, panelY, contentW, chartH, 20, "rgba(120,95,70,.22)");
+  ctx.restore();
+  roundRect(ctx, contentX, panelY, contentW, chartH, 6);
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   const hold = document.createElement("canvas");
