@@ -1131,6 +1131,44 @@
       user-select: text;
     }
     .wlt-credit::before, .wlt-credit::after { content: "✿"; color: var(--j-pink); margin: 0 10px; }
+
+    /* ---- 趋势图：显示/隐藏某个角色 ---- */
+    .th-name { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+    .th-show {
+      -webkit-appearance: none;
+      appearance: none;
+      position: relative;
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      border: 2px solid var(--ink, var(--text));
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .th-show:focus-visible { outline: 2px dashed var(--j-red, var(--pink)); outline-offset: 2px; }
+    .th-show::after {
+      content: "✓";
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-family: "Quicksand", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--ink, var(--text));
+    }
+    .th-show:checked::after { display: flex; }
+    .chart-empty-hint.hidden { display: none; }
+    .chart-empty-hint {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 8px 0 2px;
+    }
   </style>
 </head>
 <body>
@@ -1211,7 +1249,7 @@
 
     <div class="card">
       <h2><span class="ico">📋</span>数据表格</h2>
-      <p class="hint" style="margin:-4px 0 10px;">每个数值下方为「较上期增长」；首期或无上期数据时显示 — · 每页 10 条</p>
+      <p class="hint" style="margin:-4px 0 10px;">每个数值下方为「较上期增长」；首期或无上期数据时显示 — · 每页 10 条 · 表头人员 ID 后打钩＝在趋势图中显示</p>
       <div class="table-wrap">
         <table>
           <thead id="thead"></thead>
@@ -1228,6 +1266,7 @@
           <canvas id="chart"></canvas>
         </div>
       </div>
+      <div class="chart-empty-hint hidden" id="chartEmptyHint">折线图已隐藏全部人员，在数据表格表头打钩可重新显示</div>
     </div>
 
     <footer class="wlt-credit">©WLT</footer>
@@ -1312,6 +1351,8 @@ let configs = [];
 let activeConfigId = null;
 
 const selectedSeries = new Set();
+/** 趋势图中被隐藏的角色（仅影响页面折线图，不影响表格与导出） */
+const hiddenSeries = new Set();
 const selectedDates = new Set();
 const PAGE_SIZE = 10;
 let tablePage = 0; // 0-based
@@ -1515,7 +1556,7 @@ function switchConfig(id) {
   if (!configs.some(c => c.id === id)) return;
   syncActiveFromState();
   activeConfigId = id;
-  selectedSeries.clear();
+  selectedSeries.clear(); hiddenSeries.clear();
   selectedDates.clear();
   tablePage = 0;
   syncStateFromActive();
@@ -1552,7 +1593,7 @@ function deleteConfig(id) {
   configs = configs.filter(c => c.id !== id);
   if (wasActive) {
     activeConfigId = configs[0].id;
-    selectedSeries.clear();
+    selectedSeries.clear(); hiddenSeries.clear();
     selectedDates.clear();
     tablePage = 0;
     syncStateFromActive();
@@ -1637,6 +1678,7 @@ function removeSeries(name) {
   state.series = state.series.filter(s => s !== name);
   Object.keys(state.values).forEach(d => delete state.values[d][name]);
   selectedSeries.delete(name);
+  hiddenSeries.delete(name);
   save(); render();
 }
 
@@ -1927,7 +1969,32 @@ function renderTable() {
   clampTablePage();
 
   const trh = document.createElement("tr");
-  trh.innerHTML = "<th>日期</th>" + state.series.map(s => "<th>" + s + "</th>").join("");
+  const dateTh = document.createElement("th");
+  dateTh.textContent = "日期";
+  trh.appendChild(dateTh);
+  state.series.forEach(name => {
+    const th = document.createElement("th");
+    const wrap = document.createElement("label");
+    wrap.className = "th-name";
+    wrap.style.cssText = "margin:0;color:inherit;font-size:inherit;font-weight:inherit;cursor:pointer;";
+    wrap.title = "勾选：在折线图中显示 " + name;
+    const txt = document.createElement("span");
+    txt.textContent = name;
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "th-show";
+    cb.checked = !hiddenSeries.has(name);
+    cb.setAttribute("aria-label", "折线图显示 " + name);
+    cb.onchange = () => {
+      if (cb.checked) hiddenSeries.delete(name);
+      else hiddenSeries.add(name);
+      updateChart();
+    };
+    wrap.appendChild(txt);
+    wrap.appendChild(cb);
+    th.appendChild(wrap);
+    trh.appendChild(th);
+  });
   thead.appendChild(trh);
 
   const pageDates = getPageDates();
@@ -2038,9 +2105,19 @@ function getChartDpr() {
   return Math.max(2, Math.min(3, d));
 }
 
+function syncChartHint() {
+  Array.from(hiddenSeries).forEach(n => { if (!state.series.includes(n)) hiddenSeries.delete(n); });
+  const hint = document.getElementById("chartEmptyHint");
+  if (!hint) return;
+  const allHidden = state.series.length > 0 && state.series.every(n => hiddenSeries.has(n));
+  hint.classList.toggle("hidden", !allHidden);
+}
+
 function updateChart() {
+  syncChartHint();
   const labels = state.dates.map(fmtMD);
-  const datasets = buildDatasets().map(ds => Object.assign({}, ds, {
+  const visibleSeries = state.series.filter(n => !hiddenSeries.has(n));
+  const datasets = (visibleSeries.length ? buildDatasets(visibleSeries) : []).map(ds => Object.assign({}, ds, {
     borderWidth: 2.5,
     pointRadius: 4,
     pointHoverRadius: 4
@@ -2164,7 +2241,7 @@ document.getElementById("clearBtn").onclick = () => {
   state.series = [];
   state.dates = [];
   state.values = {};
-  selectedSeries.clear();
+  selectedSeries.clear(); hiddenSeries.clear();
   selectedDates.clear();
   tablePage = 0;
   save(); render();
@@ -2571,7 +2648,7 @@ function applyImportedJson(text) {
       if (!configs.some(c => c.id === activeConfigId)) {
         activeConfigId = configs[0].id;
       }
-      selectedSeries.clear();
+      selectedSeries.clear(); hiddenSeries.clear();
       selectedDates.clear();
       tablePage = 0;
       syncStateFromActive();
@@ -2588,7 +2665,7 @@ function applyImportedJson(text) {
       const cfg = getActiveConfig();
       if (cfg) cfg.name = String(parsed.name).trim();
     }
-    selectedSeries.clear();
+    selectedSeries.clear(); hiddenSeries.clear();
     selectedDates.clear();
     tablePage = 0;
     save();
@@ -2873,7 +2950,7 @@ window.addEventListener("storage", (e) => {
       configs = [cfg];
       activeConfigId = cfg.id;
     }
-    selectedSeries.clear();
+    selectedSeries.clear(); hiddenSeries.clear();
     selectedDates.clear();
     tablePage = 0;
     syncStateFromActive();
