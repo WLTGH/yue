@@ -1379,6 +1379,7 @@ function makeEmptyConfig(name) {
     id: genId(),
     name: name || "默认配置",
     series: [],
+    hidden: [],
     dates: [],
     values: {}
   };
@@ -1420,6 +1421,7 @@ function syncStateFromActive() {
     state.series = [];
     state.dates = [];
     state.values = {};
+    hiddenSeries.clear();
     return;
   }
   activeConfigId = cfg.id;
@@ -1428,6 +1430,10 @@ function syncStateFromActive() {
   state.values = cfg.values && typeof cfg.values === "object"
     ? JSON.parse(JSON.stringify(cfg.values))
     : {};
+  hiddenSeries.clear();
+  (Array.isArray(cfg.hidden) ? cfg.hidden : []).forEach(n => {
+    if (state.series.includes(n)) hiddenSeries.add(n);
+  });
 }
 
 /** 把当前 state 写回 active 配置页对象 */
@@ -1437,6 +1443,7 @@ function syncActiveFromState() {
   cfg.series = state.series.slice();
   cfg.dates = state.dates.slice();
   cfg.values = JSON.parse(JSON.stringify(state.values));
+  cfg.hidden = Array.from(hiddenSeries).filter(n => state.series.includes(n));
 }
 
 function applyStatePayload(payload) {
@@ -1475,7 +1482,8 @@ function load() {
         name: (c.name && String(c.name).trim()) || "未命名",
         series: Array.isArray(c.series) ? c.series : [],
         dates: Array.isArray(c.dates) ? c.dates : [],
-        values: c.values && typeof c.values === "object" ? c.values : {}
+        values: c.values && typeof c.values === "object" ? c.values : {},
+        hidden: Array.isArray(c.hidden) ? c.hidden.filter(x => typeof x === "string") : []
       }));
       if (!configs.length) configs = [makeEmptyConfig("默认配置")];
       activeConfigId = data.activeConfigId;
@@ -1516,7 +1524,8 @@ function buildStorePayload() {
       name: c.name,
       series: c.series.slice(),
       dates: c.dates.slice(),
-      values: JSON.parse(JSON.stringify(c.values))
+      values: JSON.parse(JSON.stringify(c.values)),
+      hidden: Array.isArray(c.hidden) ? c.hidden.slice() : []
     }))
   };
 }
@@ -1989,6 +1998,7 @@ function renderTable() {
       if (cb.checked) hiddenSeries.delete(name);
       else hiddenSeries.add(name);
       updateChart();
+      save();
     };
     wrap.appendChild(txt);
     wrap.appendChild(cb);
@@ -2642,7 +2652,8 @@ function applyImportedJson(text) {
         name: (c.name && String(c.name).trim()) || "未命名",
         series: Array.isArray(c.series) ? c.series : [],
         dates: Array.isArray(c.dates) ? c.dates : [],
-        values: c.values && typeof c.values === "object" ? c.values : {}
+        values: c.values && typeof c.values === "object" ? c.values : {},
+        hidden: Array.isArray(c.hidden) ? c.hidden.filter(x => typeof x === "string") : []
       }));
       activeConfigId = parsed.activeConfigId;
       if (!configs.some(c => c.id === activeConfigId)) {
@@ -2935,7 +2946,8 @@ window.addEventListener("storage", (e) => {
         name: (c.name && String(c.name).trim()) || "未命名",
         series: Array.isArray(c.series) ? c.series : [],
         dates: Array.isArray(c.dates) ? c.dates : [],
-        values: c.values && typeof c.values === "object" ? c.values : {}
+        values: c.values && typeof c.values === "object" ? c.values : {},
+        hidden: Array.isArray(c.hidden) ? c.hidden.filter(x => typeof x === "string") : []
       }));
       if (!configs.length) configs = [makeEmptyConfig("默认配置")];
       activeConfigId = data.activeConfigId;
