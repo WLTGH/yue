@@ -1355,7 +1355,7 @@ const selectedSeries = new Set();
 const hiddenSeries = new Set();
 const selectedDates = new Set();
 const PAGE_SIZE = 10;
-let tablePage = 0; // 0-based
+let tablePage = Number.MAX_SAFE_INTEGER; // 0-based；超大值会被 clampTablePage 修正为最后一页
 let storageOk = true;
 let storageWarnShown = false;
 
@@ -1567,7 +1567,7 @@ function switchConfig(id) {
   activeConfigId = id;
   selectedSeries.clear(); hiddenSeries.clear();
   selectedDates.clear();
-  tablePage = 0;
+  tablePage = Number.MAX_SAFE_INTEGER; // 默认显示最后一页
   syncStateFromActive();
   save();
   render();
@@ -1604,7 +1604,7 @@ function deleteConfig(id) {
     activeConfigId = configs[0].id;
     selectedSeries.clear(); hiddenSeries.clear();
     selectedDates.clear();
-    tablePage = 0;
+    tablePage = Number.MAX_SAFE_INTEGER; // 默认显示最后一页
     syncStateFromActive();
   }
   save();
@@ -1842,6 +1842,7 @@ function renderPager() {
   const pager = document.getElementById("tablePager");
   if (!pager) return;
   const total = state.dates.length;
+  clampTablePage();
   const pages = getTotalPages();
   if (total <= PAGE_SIZE) {
     pager.classList.add("hidden");
@@ -1849,8 +1850,6 @@ function renderPager() {
     return;
   }
   pager.classList.remove("hidden");
-  const start = tablePage * PAGE_SIZE + 1;
-  const end = Math.min((tablePage + 1) * PAGE_SIZE, total);
   let html = "";
   html += '<button type="button" class="btn gray small" data-page="prev"' + (tablePage === 0 ? " disabled" : "") + ">‹ 上一页</button>";
   for (let i = 0; i < pages; i++) {
@@ -1858,7 +1857,6 @@ function renderPager() {
     html += '<button type="button" class="btn gray small' + active + '" data-page="' + i + '">' + (i + 1) + "</button>";
   }
   html += '<button type="button" class="btn gray small" data-page="next"' + (tablePage >= pages - 1 ? " disabled" : "") + ">下一页 ›</button>";
-  html += '<span class="pager-info">' + start + "–" + end + " / " + total + "</span>";
   pager.innerHTML = html;
   pager.querySelectorAll("[data-page]").forEach(btn => {
     btn.onclick = () => {
@@ -2253,7 +2251,7 @@ document.getElementById("clearBtn").onclick = () => {
   state.values = {};
   selectedSeries.clear(); hiddenSeries.clear();
   selectedDates.clear();
-  tablePage = 0;
+  tablePage = Number.MAX_SAFE_INTEGER; // 默认显示最后一页
   save(); render();
 };
 function exportImage(seriesFilter, dateFilter) {
@@ -2661,7 +2659,7 @@ function applyImportedJson(text) {
       }
       selectedSeries.clear(); hiddenSeries.clear();
       selectedDates.clear();
-      tablePage = 0;
+      tablePage = Number.MAX_SAFE_INTEGER; // 默认显示最后一页
       syncStateFromActive();
       save();
       render();
@@ -2678,7 +2676,7 @@ function applyImportedJson(text) {
     }
     selectedSeries.clear(); hiddenSeries.clear();
     selectedDates.clear();
-    tablePage = 0;
+    tablePage = Number.MAX_SAFE_INTEGER; // 默认显示最后一页
     save();
     render();
     alert("已导入到当前配置页");
@@ -2964,7 +2962,7 @@ window.addEventListener("storage", (e) => {
     }
     selectedSeries.clear(); hiddenSeries.clear();
     selectedDates.clear();
-    tablePage = 0;
+    tablePage = Number.MAX_SAFE_INTEGER; // 默认显示最后一页
     syncStateFromActive();
     render();
   }
